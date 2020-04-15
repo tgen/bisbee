@@ -6,11 +6,12 @@ import numpy as np
 events_file=sys.argv[1]
 event_type=sys.argv[2]
 outname=sys.argv[3]
+spladder_ver=int(sys.argv[4])
 
 event_dict={'A3':'alt_3prime','A5':'alt_5prime','ES':'exon_skip','IR':'intron_retention','MUT':'mutex_exons'}
 
 f=h5py.File(events_file,'r')
-gene_idx=f['gene_idx']
+gene_idx=np.array(f['gene_idx']).astype(int)
 conf=f['confirmed']
 gene_names=np.array(list(map(lambda x: x.decode('UTF-8'),f['gene_names'])))
 gene_chr=np.array(list(map(lambda x: x.decode('UTF-8'),f['gene_chr'])))
@@ -80,11 +81,27 @@ if event_type=='MUT':
     data['exon2_start']=event_coord[:,4]+1
     data['exon2_end']=event_coord[:,5]
     data['exon_aft_start']=event_coord[:,6]+1
+    if spladder_ver==1:
+        switch_idx=data['exon1_end']-data['exon1_start']>data['exon2_end']-data['exon2_start']
+        data.loc[switch_idx,'exon1_start']=event_coord[switch_idx,4]+1
+        data.loc[switch_idx,'exon1_end']=event_coord[switch_idx,5]
+        data.loc[switch_idx,'exon2_start']=event_coord[switch_idx,2]+1
+        data.loc[switch_idx,'exon2_end']=event_coord[switch_idx,3]
+
     iso1_str=data.apply(lambda x: str(x['exon_pre_end'])+'j'+str(x['exon1_start'])+'_'+str(x['exon1_end'])+'j'+str(x['exon_aft_start']),axis=1)
     iso2_str=data.apply(lambda x: str(x['exon_pre_end'])+'j'+str(x['exon2_start'])+'_'+str(x['exon2_end'])+'j'+str(x['exon_aft_start']),axis=1)
 
 data['event_jid']=data['contig'] + ':g.' + iso1_str + '>' + iso2_str + "[spl" + event_type + "]"
-iso1=pd.DataFrame(np.transpose(f['iso1']),columns=list(map(lambda x: x + '_iso1',sample_names)))
-iso2=pd.DataFrame(np.transpose(f['iso2']),columns=list(map(lambda x: x + '_iso2',sample_names)))
+if spladder_ver==1 and (event_type=='A3' or event_type=='A5'):
+    iso1=pd.DataFrame(np.transpose(f['iso1']),columns=list(map(lambda x: x + '_iso2',sample_names)))
+    iso2=pd.DataFrame(np.transpose(f['iso2']),columns=list(map(lambda x: x + '_iso1',sample_names)))
+else:
+    iso1=pd.DataFrame(np.transpose(f['iso1']),columns=list(map(lambda x: x + '_iso1',sample_names)))
+    iso2=pd.DataFrame(np.transpose(f['iso2']),columns=list(map(lambda x: x + '_iso2',sample_names)))
+if spladder_ver==1 and event_type=='MUT':
+    temp=iso1.loc[switch_idx,:]
+    iso1.loc[switch_idx,:]=iso2.loc[switch_idx,:]
+    iso2.loc[switch_idx,:]=temp
+
 data=pd.concat([data,iso1,iso2],axis=1)
 data.to_csv(outname,index=False)
