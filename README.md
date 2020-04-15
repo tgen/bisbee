@@ -1,13 +1,13 @@
 # bisbee
 alternative splicing analysis pipeline
 
-## Prepare input (currently only implemented for spladder v2)
+## Prepare input (currently only implemented for spladder)
 
-`python utils/prep.py spladder_counts_file event_type outname`
+`python utils/prep.py spladder_counts_file event_type outname spladder_version`
 
 example:
 
-`python utils/prep.py merge_graphs_alt_3prime.counts.hdf5 IR bisbee.IR.counts.txt`
+`python utils/prep.py merge_graphs_alt_3prime.counts.hdf5 IR bisbee.IR.counts.txt 2`
 
 ## Statistical analysis
 ### differential splicing
