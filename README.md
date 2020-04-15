@@ -12,7 +12,7 @@ example:
 ## Statistical analysis
 ### differential splicing
 
-`Rscript stats/diff.R  bisbee_counts_file sample_table outname 200`
+`Rscript stats/diff.R  bisbee_counts_file sample_table outname maxW`
 
 example:
 
