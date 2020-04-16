@@ -1,6 +1,7 @@
 library(stats4)
 library(fitdistrplus)
 library(extraDistr)
+library(stringr)
 
 args = commandArgs(trailingOnly=TRUE)
 countsFile=args[1]
@@ -28,7 +29,9 @@ print(paste('eventCount:',eventCount))
 
 iso1=sapply(data[,iso1_idx],as.numeric)
 iso2=sapply(data[,iso2_idx],as.numeric)
-info_idx=seq(1,iso1_idx[1]-1)
+#print(head(iso1))
+info_idx=seq(1,which(colnames(data)=="event_jid"))
+print(info_idx)
 cnames<-c(colnames(data)[info_idx],"alpha","beta","depth_min","depth_q05","depth_q25","depth_median","depth_q75","depth_q95","depth_max","psi_min","psi_q05","psi_q25","psi_median","psi_q75","psi_q95","psi_max","log-likelihood")
 depthQ=t(apply(iso1+iso2,1,quantile,c(0,0.05,0.25,0.5,0.75,0.95,1)))
 psi=iso1/(iso1+iso2)
@@ -70,5 +73,5 @@ alpha[fIdx[nIdx]]=NA
 beta[fIdx[nIdx]]=NA
 
 psiQ=t(apply(iso1/(iso1+iso2),1,quantile,c(0,0.05,0.25,0.5,0.75,0.95,1),na.rm=TRUE))
-write.table(data[,info_idx],alpha,beta,depthQ,psiQ,ll),outname,col.names=cnames,row.names=FALSE,append = FALSE,sep="\t")
+write.table(cbind(data[,info_idx],alpha,beta,depthQ,psiQ,ll),outname,col.names=cnames,row.names=FALSE,append = FALSE,sep="\t")
 
