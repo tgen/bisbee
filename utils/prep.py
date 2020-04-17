@@ -7,9 +7,9 @@ events_file=sys.argv[1]
 event_type=sys.argv[2]
 outname=sys.argv[3]
 spladder_ver=int(sys.argv[4])
-if len(sys.argv)>4:
-    sample_file=sys.argv[5]
 if len(sys.argv)>5:
+    sample_file=sys.argv[5]
+if len(sys.argv)>6:
     chunk_num=int(sys.argv[6])
     chunk_size=int(sys.argv[7])
 
@@ -18,7 +18,7 @@ event_dict={'A3':'alt_3prime','A5':'alt_5prime','ES':'exon_skip','IR':'intron_re
 f=h5py.File(events_file,'r')
 try:
     start_pos=chunk_num*chunk_size
-    end_pos=(chunk_num+1)*chunk_size
+    end_pos=min((chunk_num+1)*chunk_size,len(f['gene_idx']))
 except:
     start_pos=0
     end_pos=len(f['gene_idx'])
