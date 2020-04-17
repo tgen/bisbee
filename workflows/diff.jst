@@ -1,0 +1,15 @@
+
+{% for event in event_list %}
+- name: prepTest_{{ event["name"] }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/prep.py  {{ event["test_file"] }} {{ event["name"]}} {{ testname }}.{{ event["name"]}}.bisbeeCounts.csv {{ test_spladder_ver }}
+{% endfor %}
+
+{% for event in event_list %}
+- name: score_{{ event["name"] }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/outlierDiff.R  {{ testname }}.{{ event["name"]}}.bisbeeCounts.csv {{ testsamples }} {{ testname }}.{{ event["name"]}}.bisbeeDiff.txt {{ maxW }}
+  after: prepTest_{{ event["name"] }}
+{% endfor %}
