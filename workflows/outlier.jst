@@ -1,0 +1,43 @@
+{% for event in event_list %}
+{% for n in range(event["n_max"]+1) %}
+- name: prepRef_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/prep.py  {{ event["ref_file"] }} {{ event["name"]}} {{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ ref_spladder_ver }} {{ ref_samples }} {{ n }} {{ chunk_size }}
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max"]+1) %}
+- name: fit_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/outlierFit.R  {{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ maxBeta }} {{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeFit.txt
+  after: prepRef_{{ event["name"] }}_{{ n }}
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+- name: combine_fit_{{ event["name"] }}
+  cmd: |
+   head -n 1 {{ refname }}.{{ event["name"]}}.c000.bisbeeFit.txt >{{ refname }}.{{ event["name"]}}.bisbeeFit.txt
+   tail -q -n +2 {{ refname }}.{{ event["name"]}}.c*.bisbeeFit.txt >>{{ refname }}.{{ event["name"]}}.bisbeeFit.txt
+  after-re: fit_{{ event["name"] }}_.*
+{% endfor %}
+
+{% for event in event_list %}
+- name: prepTest_{{ event["name"] }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/prep.py  {{ event["test_file"] }} {{ event["name"]}} {{ testname }}.{{ event["name"]}}.bisbeeCounts.csv {{ test_spladder_ver }}
+{% endfor %}
+
+{% for event in event_list %}
+- name: score_{{ event["name"] }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/outlierScore.R  {{ refname }}.{{ event["name"]}}.bisbeeFit.txt {{ testname }}.{{ event["name"]}}.bisbeeCounts.csv {{ testname }}.{{ refname }}.{{ event["name"]}}.bisbeeOutlier.txt
+  after:
+   - prepTest_{{ event["name"] }}
+   - combine_fit_{{ event["name"] }}
+{% endfor %}
