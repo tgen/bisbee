@@ -141,7 +141,7 @@ def make_prot_from_coord(transcript,coord,ref):
    effect='PrematureStop'
   return prot_seq, effect
 
-def get_event_coords(event_info,event_type,spladder_version):
+def get_event_coords(event_info,event_type):
  event_coords=pd.DataFrame(columns=("isoform","start","end"))
  if event_type=="IR":
   event_coords=event_coords.append({"isoform":"iso2","start":event_info["exon1_end"],"end":event_info["exon2_start"]},ignore_index=True)
@@ -155,19 +155,11 @@ def get_event_coords(event_info,event_type,spladder_version):
   event_coords=event_coords.append({"isoform":"iso2","start":event_info["exon_pre_end"],"end":event_info["exon2_start"]},ignore_index=True)
   event_coords=event_coords.append({"isoform":"iso2","start":event_info["exon2_end"],"end":event_info["exon_aft_start"]},ignore_index=True)
  elif (event_type=="A3" and event_info["strand"]=="+") or (event_type=="A5" and event_info["strand"]=="-"):
-  if spladder_version==1:
-   event_coords=event_coords.append({"isoform":"iso1","start":event_info["exon_const_end"],"end":event_info["exon_alt1_start"]},ignore_index=True)
-   event_coords=event_coords.append({"isoform":"iso2","start":event_info["exon_const_end"],"end":event_info["exon_alt2_start"]},ignore_index=True)
-  else:
-   event_coords=event_coords.append({"isoform":"iso2","start":event_info["exon_const_end"],"end":event_info["exon_alt1_start"]},ignore_index=True)
-   event_coords=event_coords.append({"isoform":"iso1","start":event_info["exon_const_end"],"end":event_info["exon_alt2_start"]},ignore_index=True)
+  event_coords=event_coords.append({"isoform":"iso2","start":event_info["exon_const_end"],"end":event_info["exon_alt1_start"]},ignore_index=True)
+  event_coords=event_coords.append({"isoform":"iso1","start":event_info["exon_const_end"],"end":event_info["exon_alt2_start"]},ignore_index=True)
  elif (event_type=="A3" and event_info["strand"]=="-") or (event_type=="A5" and event_info["strand"]=="+"):
-  if spladder_version==1:
-   event_coords=event_coords.append({"isoform":"iso1","start":event_info["exon_alt1_end"],"end":event_info["exon_const_start"]},ignore_index=True)
-   event_coords=event_coords.append({"isoform":"iso2","start":event_info["exon_alt2_end"],"end":event_info["exon_const_start"]},ignore_index=True)
-  else:
-   event_coords=event_coords.append({"isoform":"iso2","start":event_info["exon_alt1_end"],"end":event_info["exon_const_start"]},ignore_index=True)
-   event_coords=event_coords.append({"isoform":"iso1","start":event_info["exon_alt2_end"],"end":event_info["exon_const_start"]},ignore_index=True)
+  event_coords=event_coords.append({"isoform":"iso2","start":event_info["exon_alt1_end"],"end":event_info["exon_const_start"]},ignore_index=True)
+  event_coords=event_coords.append({"isoform":"iso1","start":event_info["exon_alt2_end"],"end":event_info["exon_const_start"]},ignore_index=True)
  return event_coords
 
 def find_matching_transcripts(ensembl,gene_id,event_coords):
