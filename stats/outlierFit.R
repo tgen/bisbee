@@ -68,9 +68,11 @@ alpha=a
 alpha[hIdx]=b[hIdx]
 beta=b
 beta[hIdx]=a[hIdx]
-nIdx=which(sapply(param,is.null))
-alpha[fIdx[nIdx]]=NA
-beta[fIdx[nIdx]]=NA
+if(length(fIdx)>0){
+  nIdx=which(sapply(param,is.null))
+  alpha[fIdx[nIdx]]=NA
+  beta[fIdx[nIdx]]=NA 
+}
 
 psiQ=t(apply(iso1/(iso1+iso2),1,quantile,c(0,0.05,0.25,0.5,0.75,0.95,1),na.rm=TRUE))
 write.table(cbind(data[,info_idx],alpha,beta,depthQ,psiQ,ll),outname,col.names=cnames,row.names=FALSE,append = FALSE,sep="\t")
