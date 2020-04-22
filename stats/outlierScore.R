@@ -28,6 +28,7 @@ print(idx[which(!is.na(idx))])
 alpha=psiStats[idx,"alpha"]
 beta=psiStats[idx,"beta"]
 scores=matrix(NA,nrow = length(alpha),ncol = sampleCount)
+colnames(scores)<-sample_names
 idx1=which(alpha>=beta)
 idx2=which(alpha<beta)
 if(length(idx1)>0){
