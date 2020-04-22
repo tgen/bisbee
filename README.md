@@ -21,12 +21,15 @@ example:
 ### differential splicing
 
 `Rscript stats/diff.R  bisbee_counts_file sample_table outname maxW`
+ 
+ - bisbee_counts_file: output from utils/prep.py
+ - sample_table: tab delimited text file with sample ids in first column and sample group in second column, no header
+ - outname: output file name
+ - maxW: constraint on W parameter, recommended value 200
 
 example:
 
-`Rscript stats/diff.R testSamples.IR.bisbeeCounts.txt sample_table.txt testSamples.IR.bisbeeDiff.txt 200`
-
-sample table should have the sample names in the first column and the sample group in the second
+`Rscript stats/diff.R testSamples.IR.bisbeeCounts.csv sample_table.txt testSamples.IR.bisbeeDiff.txt 200`
 
 Also see jetstream workflow: [workflows/diff.jst](workflows/diff.jst)
 
@@ -35,11 +38,23 @@ Also see jetstream workflow: [workflows/diff.jst](workflows/diff.jst)
 
 `Rscript stats/outlierFit.R reference_bisbee_counts_file maxBeta outname`
 
+- reference_bisbee_counts_file: output of utils/prep.py for samples in reference set
+- maxBeta: constraint on Beta parameter, recommended value 80
+- outname: name of output file
+
 example:
 
 `Rscript stats/outlierFit.R refSamples.IR.bisbeeCounts.txt 80 refSamples.IR.bisbeeFit.txt`
 
 2. Score test samples
+
+`Rscript stats/outlierScore.R bisbee_fit_out test_bisbee_counts outname`
+
+ - bisbee_fit_out: output from stats/outlierFit.R on reference samples
+ - test_bisbee_counts: output from utils/prep.py on test samples
+ - outname: name of output file
+
+example:
 
 `Rscript stats/outlierScore.R refSamples.IR.bisbeeFit.txt testSamples.IR.bisbeeCounts.txt  test.ref.IRbisbeeScores.txt`
 
