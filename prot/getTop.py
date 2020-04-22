@@ -24,7 +24,7 @@ seq_table=pd.read_csv(name + ".seqTable.csv")
 peptTable=pd.concat([pd.read_csv(f) for f in peptfiles],ignore_index=True)
 peptTable["novelPept"]=peptTable.mutPept.isin(peptTable.wtPept)==False
 enst=peptTable.effectId.apply(lambda x: x.split('_')[0])
-junc=peptTable.effectId.apply(lambda x: x.split('.')[1].split('[')[0])
+junc=peptTable.effectId.apply(lambda x: x.split('g.')[1].split('[')[0])
 iso1_str=junc.apply(lambda x: x.split('>')[0])
 iso2_str=junc.apply(lambda x: x.split('>')[1])
 iso1_id="en|" + enst + ":g." + junc
