@@ -59,3 +59,42 @@ example:
 `Rscript stats/outlierScore.R refSamples.IR.bisbeeFit.txt testSamples.IR.bisbeeCounts.txt  test.ref.IRbisbeeScores.txt`
 
 Also see jetstream workflow: [workflows/outlier.jst](workflows/outlier.jst)
+
+## Protein Sequence Generation
+
+1. Generate protein sequences
+
+`python prot/build.py bisbee_file event_type aapad outname ensemble_release ref_fasta`
+
+ - bisbee_file: output of utils/prep.py
+ - event_type: A3 (alt_3prime), A5 (alt_5prime), ES (exon_skip), IR (intron_retention), or MUT (mutually exclusive exons)
+ - aapad: number of amino acids to pad around effected sequence in peptide output
+ - outname: name of output file
+ - ensemble_release: version of ensemble to use
+ - ref_fasta: fasta of reference genome
+ 
+ example: 
+ 
+ `python prot/build.py testSamples.IR.bisbeeCounts.csv IR 9 testSamples.bisbeeProt ensemble_release hg19.fa`
+ 
+ 2. find unique protein sequences
+ 
+ `python prot/getUnique.py prot_folder prot_prefix`
+  
+  - prot_folder: folder with results from prot/build.py
+  - prot_prefix: outname used with prot/build.py
+  
+  example:
+  `python prot/getUnique.py bisbeeProt testSamples.bisbeeProt
+  
+  3. select top transcript effect per event
+  
+  `python prot/getTop.py prot_folder prot_prefix`
+  
+  - prot_folder: folder with results from prot/build.py
+  - prot_prefix: outname used with prot/build.py
+  
+  example:
+  `python prot/getTop.py bisbeeProt testSamples.bisbeeProt
+  
+Also see jetstream workflow: [workflows/prot.jst](workflows/prot.jst)
