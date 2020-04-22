@@ -64,8 +64,8 @@ for index,row in events_table.iterrows():
  wt_list=[]
  novel_list=[]
  event_coords=bb.get_event_coords(row,event_type)
- iso1_str=events_table.loc[index,"event_jid"].split(".")[1].split(">")[0]
- iso2_str=events_table.loc[index,"event_jid"].split(".")[1].split(">")[1].split("[")[0]
+ iso1_str=events_table.loc[index,"event_jid"].split("g.")[1].split(">")[0]
+ iso2_str=events_table.loc[index,"event_jid"].split("g.")[1].split(">")[1].split("[")[0]
  transcript_table=bb.find_matching_transcripts(ensembl,row["gene"],event_coords)
  events_table.loc[index,"iso1_pc"]='|'.join(transcript_table.index.values[(transcript_table.coding==True) & (transcript_table.matching_isoform=="iso1")])
  events_table.loc[index,"iso2_pc"]='|'.join(transcript_table.index.values[(transcript_table.coding==True) & (transcript_table.matching_isoform=="iso2")])
