@@ -4,7 +4,7 @@ import numpy as np
 
 path=sys.argv[1]
 diffName=sys.argv[2]
-thresh=int(sys.argv[3])
+thresh=float(sys.argv[3])
 
 filelist=os.listdir(path)
 diff_files=[]
