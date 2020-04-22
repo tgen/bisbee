@@ -181,11 +181,21 @@ def find_matching_transcripts(ensembl,gene_id,event_coords):
    transcript_table.loc[tid,"coding"]=False
   else:
    transcript_table.loc[tid,"coding"]=True
-  #print(junctions)
-  if junctions.equals(event_coords.loc[event_coords.isoform=="iso1",["start","end"]].reset_index(drop=True).astype(int)):
-   transcript_table.loc[tid,"matching_isoform"]="iso1"
-  elif junctions.equals(event_coords.loc[event_coords.isoform=="iso2",["start","end"]].reset_index(drop=True).astype(int)):
+  ### add handling of IR
+  #print(event_coords)
+  #print(exons)
+  if junctions.equals(event_coords.loc[event_coords.isoform=="iso2",["start","end"]].reset_index(drop=True).astype(int)):
    transcript_table.loc[tid,"matching_isoform"]="iso2"
+  elif sum(event_coords.isoform=="iso1")==0:
+   if len(exons.start)>0:
+    if event_coords.start[0]>exons.start.iloc[0] and event_coords.end[0]<exons.end.iloc[0]:
+     transcript_table.loc[tid,"matching_isoform"]="iso1"
+    else:
+     transcript_table.loc[tid,"matching_isoform"]="none"
+   else:
+    transcript_table.loc[tid,"matching_isoform"]="none"
+  elif junctions.equals(event_coords.loc[event_coords.isoform=="iso1",["start","end"]].reset_index(drop=True).astype(int)):
+   transcript_table.loc[tid,"matching_isoform"]="iso1"
   else:
    transcript_table.loc[tid,"matching_isoform"]="none"
  return transcript_table
