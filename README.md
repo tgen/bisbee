@@ -3,7 +3,15 @@ alternative splicing analysis pipeline
 
 ## Prepare input (currently only implemented for spladder)
 
-`python utils/prep.py spladder_counts_file event_type outname spladder_version`
+`python utils/prep.py spladder_counts_file event_type outname spladder_version [sample_file] [chunk_num] [chunksize]`
+
+ - spladder_counts_file: \*counts.hdf5 file from spladder
+ - event_type: A3 (alt_3prime), A5 (alt_5prime), ES (exon_skip), IR (intron_retention), or MUT (mutually exclusive exons)
+ - outname: name for output file
+ - spladder_version: 1 for counts files from SplAdder 1.x to correct for changes in later versions
+ - sample_file: file with list of samples to include in output if only a subset of the samples from the counts file are desired (optional)
+ - chunk_num: output events starting at number chunk_num x chunk_size (optional - intended for analyzing large files in pipelines)
+ - chunk_size: number of events to output (optional)
 
 example:
 
