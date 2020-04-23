@@ -6,7 +6,7 @@ library(stringr)
 args = commandArgs(trailingOnly=TRUE)
 countsFile=args[1]
 sample_file=args[2]
-outname=args[3]
+outname=str_c(args[3],".bisbeeDiff.csv")
 maxW=as.integer(args[4])
 
 data=read.csv(countsFile)
@@ -105,6 +105,6 @@ if(length(idx)>0){
 }
 psi=iso1/(iso1+iso2)
 res<-cbind(data[,info_idx],ll_1group-ll_2group,psi[,g1idx],psi[,g2idx],iso1[,g1idx]+iso2[,g1idx],iso1[,g2idx]+iso2[,g2idx],fitPSI1,fitPSI2,fitPSIa,fitW,fitWa)
-write.table(res,outname,col.names=cnames,row.names=FALSE,append = FALSE,sep="\t")
+write.table(res,outname,col.names=cnames,row.names=FALSE,append = FALSE,sep=",")
 
 

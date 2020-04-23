@@ -3,7 +3,7 @@
 - name: prepRef_{{ event["name"] }}_{{ n }}
   cmd: |
    module load python/3.6.0
-   python {{ bisbeePath }}/utils/prep.py  {{ event["ref_file"] }} {{ event["name"]}} {{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ ref_spladder_ver }} {{ ref_samples }} {{ n }} {{ chunk_size }}
+   python {{ bisbeePath }}/utils/prep.py  {{ event["ref_file"] }} {{ event["name"]}} {{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ ref_spladder_ver }} {{ ref_samples }} {{ n }} {{ chunk_size }}
 {% endfor %}
 {% endfor %}
 
@@ -12,7 +12,7 @@
 - name: fit_{{ event["name"] }}_{{ n }}
   cmd: |
    module load R/3.5.2
-   Rscript {{ bisbeePath }}/stats/outlierFit.R  {{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ maxBeta }} {{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeFit.txt
+   Rscript {{ bisbeePath }}/stats/outlierFit.R  {{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ maxBeta }} {{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}
   after: prepRef_{{ event["name"] }}_{{ n }}
 {% endfor %}
 {% endfor %}
@@ -20,8 +20,8 @@
 {% for event in event_list %}
 - name: combine_fit_{{ event["name"] }}
   cmd: |
-   head -n 1 {{ refname }}.{{ event["name"]}}.c000.bisbeeFit.txt >{{ refname }}.{{ event["name"]}}.bisbeeFit.txt
-   tail -q -n +2 {{ refname }}.{{ event["name"]}}.c*.bisbeeFit.txt >>{{ refname }}.{{ event["name"]}}.bisbeeFit.txt
+   head -n 1 {{ refname }}.{{ event["name"]}}.c000.bisbeeFit.csv >{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv
+   tail -q -n +2 {{ refname }}.{{ event["name"]}}.c*.bisbeeFit.csv >>{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv
   after-re: fit_{{ event["name"] }}_.*
 {% endfor %}
 
@@ -36,7 +36,7 @@
 - name: score_{{ event["name"] }}
   cmd: |
    module load R/3.5.2
-   Rscript {{ bisbeePath }}/stats/outlierScore.R  {{ refname }}.{{ event["name"]}}.bisbeeFit.txt {{ testname }}.{{ event["name"]}}.bisbeeCounts.csv {{ testname }}.{{ refname }}.{{ event["name"]}}.bisbeeOutlier.txt
+   Rscript {{ bisbeePath }}/stats/outlierScore.R  {{ refname }}.{{ event["name"]}}.bisbeeFit.csv {{ testname }}.{{ event["name"]}}.bisbeeCounts.csv {{ testname }}.{{ refname }}.{{ event["name"]}}
   after:
    - prepTest_{{ event["name"] }}
    - combine_fit_{{ event["name"] }}

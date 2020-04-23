@@ -6,7 +6,7 @@ library(stringr)
 args = commandArgs(trailingOnly=TRUE)
 countsFile=args[1]
 maxBeta=as.integer(args[2])
-outname=args[3]
+outname=str_c(args[3],'bisbeeFit.csv')
 if (length(args)>3){
   sampleFile=args[4]
 }
@@ -75,5 +75,5 @@ if(length(fIdx)>0){
 }
 
 psiQ=t(apply(iso1/(iso1+iso2),1,quantile,c(0,0.05,0.25,0.5,0.75,0.95,1),na.rm=TRUE))
-write.table(cbind(data[,info_idx],alpha,beta,depthQ,psiQ,ll),outname,col.names=cnames,row.names=FALSE,append = FALSE,sep="\t")
+write.table(cbind(data[,info_idx],alpha,beta,depthQ,psiQ,ll),outname,col.names=cnames,row.names=FALSE,append = FALSE,sep=",")
 

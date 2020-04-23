@@ -4,7 +4,7 @@ library(stringr)
 args = commandArgs(trailingOnly=TRUE)
 fitFile=args[1]
 countsFile=args[2]
-outname=args[3]
+outname=str_c(args[3],".bisbeeOutlier.csv")
 
 psiStats=read.table(fitFile,sep="\t",header = TRUE,stringsAsFactors = FALSE)
 
@@ -38,4 +38,4 @@ if(length(idx2)>0){
   scores[idx2,]=t(sapply(idx2,function(x) -log(pmax(pbbinom(iso2[x,],iso1[x,]+iso2[x,],beta[x],alpha[x],log.p=FALSE),.Machine$double.xmin))))
 }
 
-write.table(cbind(data[,info_idx],scores),outname,row.names=FALSE,append = FALSE,sep="\t")
+write.table(cbind(data[,info_idx],scores),outname,row.names=FALSE,append = FALSE,sep=",")

@@ -5,7 +5,7 @@ import numpy as np
 
 events_file=sys.argv[1]
 event_type=sys.argv[2]
-outname=sys.argv[3]
+outname=sys.argv[3] + 'bisbeeCounts.csv'
 spladder_ver=int(sys.argv[4])
 if len(sys.argv)>5:
     sample_file=sys.argv[5]

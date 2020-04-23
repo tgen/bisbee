@@ -2,8 +2,8 @@ import pandas as pd
 import sys,os,io,re
 import numpy as np
 
-path=sys.argv[1]
-event_file=sys.argv[2]
+event_file=sys.argv[1]
+path=sys.argv[2]
 protName=sys.argv[3]
 
 filt_events=pd.read_csv(event_file)

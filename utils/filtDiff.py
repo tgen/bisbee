@@ -9,10 +9,10 @@ thresh=float(sys.argv[3])
 filelist=os.listdir(path)
 diff_files=[]
 for file in filelist:
- if file.startswith(diffName) and file.endswith('.bisbeeDiff.txt'):
+ if file.startswith(diffName) and file.endswith('.bisbeeDiff.csv'):
   diff_files.append(file)
 
-colnames=pd.read_csv(diff_files[0],nrows=1,sep="\t").columns
+colnames=pd.read_csv(diff_files[0],nrows=1).columns
 select_col=colnames[0:4]
 select_col=select_col.append(colnames[range(np.where(colnames=='event_jid')[0][0],len(colnames))])
 

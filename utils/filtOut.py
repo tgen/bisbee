@@ -16,10 +16,10 @@ if len(sys.argv)>7:
 filelist=os.listdir(path)
 out_files=[]
 for file in filelist:
- if file.startswith(outName) and file.endswith('.bisbeeOutlier.txt'):
+ if file.startswith(outName) and file.endswith('.bisbeeOutlier.csv'):
   out_files.append(file)
 
-colnames=pd.read_csv(out_files[0],nrows=1,sep="\t").columns
+colnames=pd.read_csv(out_files[0],nrows=1).columns
 info_col=colnames.values[0:4]
 info_col=np.append(info_col,'event_jid')
 try:
