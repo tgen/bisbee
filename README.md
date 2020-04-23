@@ -56,7 +56,7 @@ example:
 
 example:
 
-`Rscript stats/outlierScore.R refSamples.IR.bisbeeFit.txt testSamples.IR.bisbeeCounts.txt  test.ref.IRbisbeeScores.txt`
+`Rscript stats/outlierScore.R refSamples.IR.bisbeeFit.txt testSamples.IR.bisbeeCounts.txt  test.ref.IR.bisbeeScores.txt`
 
 Also see jetstream workflow: [workflows/outlier.jst](workflows/outlier.jst)
 
@@ -98,3 +98,71 @@ Also see jetstream workflow: [workflows/outlier.jst](workflows/outlier.jst)
   `python prot/getTop.py bisbeeProt testSamples.bisbeeProt
   
 Also see jetstream workflow: [workflows/prot.jst](workflows/prot.jst)
+
+## Filtering and annotation
+### differential splicing filtering
+
+`python utils/filtDiff.py diff_folder diff_prefix thresh`
+
+ - diff_folder: folder with differential splicing results
+ - diff_prefix: prefix of differential splicing file names
+ - thresh: threshold for selecting significant events
+ 
+ example:
+ 
+ `python utils/filtDiff.py bisbeeDiff testSamples 8`
+ 
+ ### outlier results filtering
+
+`python utils/filtOut.py out_folder out_prefix thresh sample_count [sample_file] [select_group] [exclude_group] [exclude_count]`
+
+ - out_folder: folder with outlier results
+ - out_prefix: prefix of outlier scores file names
+ - thresh: threshold for selecting outliers
+ - sample_count: number of samples passing outlier threshold to include event in output
+ - sample_file: tab delimited text file with sample ids in first column and sample group in second column, no header (optional)
+ - select_group: group of samples to look for outliers, required if sample_file is provided
+ - exclude_group: exclude events that have more than "exclude_count" outliers in this group (optional)
+ - exclude_count: maximum outliers in exclude group to allow, required if exclude_group is provided
+ 
+ example:
+ 
+ `python utils/filtOut.py bisbeeOut test.ref 8`
+ 
+ #### annotation
+ 
+ `python utils/annotate.py bisbee_out prot_folder prot_prefix`
+ 
+ - bisbee_filt: output file from utils/filtDiff.py or utils/filtOut.py
+ - prot_folder: folder with results from prot/getTop.py
+ - prot_prefix: outname used with prot/getTop.py
+ 
+ example:
+ 
+ `python utils/annotate.py testSamples.bisbeeDiff.thresh8.csv bisbeeProt testSamples.bisbeeProt`
+ 
+ output file columns:
+  - event_cat: type of splicing event
+    - Alt: alternate 3 or 5 prime splice site
+    - MutEx: mutually exclusive exons
+    - ExonInc: exon inclusion in the group indicated in the "group_higher" column
+    - ExonSkip: exon skipped in the group indicated in the "group_higher" column
+    - IntronRet: intron retained in the group indicated in the "group_higher" column
+    - IntronExc: intron excluded in the group indicated in the "group_higher" column
+  - group_higher: sample group with more of the isoform resulting in the sequence in the "mutPept" column
+  - aa_change_type: type of amino acid change relative to ensembl
+    - Canonical: protein coding event with both isoforms are in ensembl
+    - Novel: the splice event generates novel transcript and novel amino acid sequence
+    - Other: protein coding event that does not fit neatly into novel or canonical criteria
+    - ND: effect was not determined
+    - None: non-coding transcripts, silent, or protein loss events
+  - effect_cat:
+    - Substitution: amino acid substitution between isoforms, with the group indicated in the "group_higher" column having more of the isoform with sequence in the "mutPept" column, and the other group having more of the isoform with the sequence in the "wtPept" column
+    - Insertion: amino acid insertion/deletion, with the group indicated in the "group_higher" column having more of the isoform with the insertion
+    - Deletion: amino acid insertion/deletion, with the group indicated in the "group_higher" column having more of the isoform with the deletion
+    - Truncation: amino acid sequence is truncated
+    - FrameDisruption: splice event causes use of a different stop codon and altered amino acid sequence
+    - ProteinLoss: splice event causes loss of start or stop codon
+    - NonCoding: splice event only effects non-coding transcripts
+    - NA: effect not available
+    
