@@ -5,7 +5,7 @@ import numpy as np
 
 events_file=sys.argv[1]
 event_type=sys.argv[2]
-outname=sys.argv[3] + 'bisbeeCounts.csv'
+outname=sys.argv[3] + '.bisbeeCounts.csv'
 spladder_ver=int(sys.argv[4])
 if len(sys.argv)>5:
     sample_file=sys.argv[5]
@@ -30,10 +30,10 @@ gene_chr=np.array(list(map(lambda x: x.decode('UTF-8'),f['gene_chr'])))
 gene_strand=np.array(list(map(lambda x: x.decode('UTF-8'),f['gene_strand'])))
 sample_names=np.array(list(map(lambda x: x.decode('UTF-8'),f['strains'])))
 try:
-    select_samples=pd.read_table(sample_file)
+    select_samples=pd.read_table(sample_file,usecols=[0],names=["samples"])
 except:
     select_samples=sample_names
-samples,idx1,idx2=np.intersect1d(sample_names,select_samples,return_indices=True)
+samples,idx1,idx2=np.intersect1d(sample_names,select_samples.samples.apply(lambda x: x[0:24]),return_indices=True)
 idx1.sort()
 
 data=pd.DataFrame({'gene':gene_names[gene_idx],'strand':gene_strand[gene_idx],'contig':gene_chr[gene_idx]})
@@ -117,11 +117,11 @@ if event_type=='MUT':
 
 data['event_jid']=data['contig'] + ':g.' + iso1_str + '>' + iso2_str + "[spl" + event_type + "]"
 if spladder_ver==1 and (event_type=='A3' or event_type=='A5'):
-    iso1=pd.DataFrame(np.transpose(f['iso1'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso2',sample_names[idx1])))
-    iso2=pd.DataFrame(np.transpose(f['iso2'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso1',sample_names[idx1])))
+    iso1=pd.DataFrame(np.transpose(f['iso1'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso2',select_samples.samples[idx2])))
+    iso2=pd.DataFrame(np.transpose(f['iso2'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso1',select_samples.samples[idx2])))
 else:
-    iso1=pd.DataFrame(np.transpose(f['iso1'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso1',sample_names[idx1])))
-    iso2=pd.DataFrame(np.transpose(f['iso2'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso2',sample_names[idx1])))
+    iso1=pd.DataFrame(np.transpose(f['iso1'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso1',select_samples.samples[idx2])))
+    iso2=pd.DataFrame(np.transpose(f['iso2'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso2',select_samples.samples[idx2])))
 if spladder_ver==1 and event_type=='MUT':
     temp1=iso1.loc[switch_idx,:].copy()
     temp2=iso2.loc[switch_idx,:].copy()
