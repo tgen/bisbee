@@ -19,7 +19,7 @@ for file in filelist:
  if file.startswith(outName) and file.endswith('.bisbeeOutlier.csv'):
   out_files.append(file)
 
-colnames=pd.read_csv(out_files[0],nrows=1).columns
+colnames=pd.read_csv(path + "/" + out_files[0],nrows=1).columns
 info_col=colnames.values[0:4]
 info_col=np.append(info_col,'event_jid')
 try:
@@ -37,7 +37,7 @@ for group in group_list:
 filt_events=pd.DataFrame(columns=select_col)
 count_col=select_col[list(map(lambda x: x.endswith('counts'),select_col))]
 for file in out_files:
-    curr_events=pd.read_csv(file,sep="\t",usecols=np.append(info_col,sample_table.samples))
+    curr_events=pd.read_csv(path + "/" + file,usecols=np.append(info_col,sample_table.samples))
     for group in group_list:
         sample_names=sample_table.samples[sample_table.group==group]
         curr_events[group + '_high_counts']=curr_events[sample_names].apply(lambda x: np.sum(x>thresh),axis=1)

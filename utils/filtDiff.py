@@ -12,13 +12,16 @@ for file in filelist:
  if file.startswith(diffName) and file.endswith('.bisbeeDiff.csv'):
   diff_files.append(file)
 
-colnames=pd.read_csv(diff_files[0],nrows=1).columns
+colnames=pd.read_csv(path + "/" + diff_files[0],nrows=1).columns
 select_col=colnames[0:4]
 select_col=select_col.append(colnames[range(np.where(colnames=='event_jid')[0][0],len(colnames))])
+print(colnames)
+print(select_col)
 
 filt_events=pd.DataFrame(columns=select_col)
 for file in diff_files:
-    curr_events=pd.read_csv(file,sep="\t",usecols=select_col)
+    print(file)
+    curr_events=pd.read_csv(path + "/" + file,usecols=select_col)
     filt_events=filt_events.append(curr_events[curr_events.ll_ratio>thresh])
 
 filt_events=filt_events.sort_values(by="ll_ratio",ascending=False)
