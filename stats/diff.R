@@ -8,6 +8,9 @@ countsFile=args[1]
 sample_file=args[2]
 outname=str_c(args[3],".bisbeeDiff.csv")
 maxW=as.integer(args[4])
+if (length(args)>4){
+  groups=c(args[5],args[6])
+}
 
 data=read.csv(countsFile)
 iso1_idx=which(endsWith(colnames(data),"iso1"))
@@ -15,7 +18,12 @@ iso2_idx=which(endsWith(colnames(data),"iso2"))
 sample_names=str_replace(colnames(data)[iso1_idx],"_iso1","")
 
 sample_table=read.table(sample_file)
-groups=levels(sample_table$V2)
+if(exists('groups')){
+  sample_table$V2=factor(sample_table$V2,levels=groups)
+}else{
+  groups=levels(sample_table$V2) 
+}
+
 g1idx=sample_names %in% sample_table$V1[unclass(sample_table$V2)==1]
 g2idx=sample_names %in% sample_table$V1[unclass(sample_table$V2)==2]
 sidx=g1idx | g2idx
