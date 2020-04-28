@@ -6,7 +6,7 @@ fitFile=args[1]
 countsFile=args[2]
 outname=str_c(args[3],".bisbeeOutlier.csv")
 
-psiStats=read.table(fitFile,sep="\t",header = TRUE,stringsAsFactors = FALSE)
+psiStats=read.csv(fitFile,header = TRUE,stringsAsFactors = FALSE)
 
 data=read.csv(countsFile)
 iso1_idx=which(endsWith(colnames(data),"iso1"))

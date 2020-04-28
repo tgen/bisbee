@@ -6,7 +6,7 @@ library(stringr)
 args = commandArgs(trailingOnly=TRUE)
 countsFile=args[1]
 maxBeta=as.integer(args[2])
-outname=str_c(args[3],'bisbeeFit.csv')
+outname=str_c(args[3],'.bisbeeFit.csv')
 if (length(args)>3){
   sampleFile=args[4]
 }
