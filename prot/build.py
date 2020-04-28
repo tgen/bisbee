@@ -40,11 +40,11 @@ else:
 events_table=pd.read_csv(events_file,usecols=col_types.keys(),dtype=col_types)
 events_table=events_table.assign(coding_transcript_effect=None,top_effect_transcript=None,effect_type=None,iso1_pc=None,iso2_pc=None,other_pc=None,iso1_nc=None,iso2_nc=None,other_nc=None)
 topEffect_list=[]
-wt_file='.'.join([out_name,event_type,"wtSeq.fasta"])
+wt_file='.'.join([out_name,event_type,"refSeq.fasta"])
 if os.path.exists(wt_file):
  os.remove(wt_file)
 wt_fasta=open(wt_file,"a+")
-novel_file='.'.join([out_name,event_type,"novelSeq.fasta"])
+novel_file='.'.join([out_name,event_type,"altSeq.fasta"])
 if os.path.exists(novel_file):
  os.remove(novel_file)
 novel_fasta=open(novel_file,"a+")
@@ -52,9 +52,9 @@ peptides_file='.'.join([out_name,event_type,"peptides.csv"])
 if os.path.exists(peptides_file):
  os.remove(peptides_file)
 peptides_table=open(peptides_file,"a+")
-effectCol=["mutPept","event_id","effectId","gene","orf_effect","aa_effect","topEffect","wtPept","wtIsoform","sourceName","novelSeqLen","wtSeqLen","delSeqLen","wtSeqPos","mutSeqPos"]
+effectCol=["altPept","event_id","effectId","gene","orf_effect","aa_effect","topEffect","refPept","refIsoform","sourceName","insSeqLen","refSeqLen","delSeqLen","refSeqPos","altSeqPos"]
 effectDF=pd.DataFrame(columns=effectCol)
-effectDF.to_csv(peptides_table,header=True)
+effectDF.to_csv(peptides_table,header=True,index=False)
 
 ## for each event
 ###find matching transcripts
@@ -165,7 +165,7 @@ for index,row in events_table.iterrows():
      top_effectId=effectId
      top_effect_score=curr_effect_score
      max_wt_seq=len(wt_seq)
-   curr_effect=pd.Series({"mutPept": mut_pept, "event_id": events_table.loc[index,"event_id"], "effectId": effectId, "gene": transcript.gene.gene_name,"orf_effect": coding_effect,"aa_effect": aa_effect,"wtPept": wt_pept,"wtIsoform": transcript_info["matching_isoform"],"novelSeqLen": novel_seq_len,"wtSeqLen": len(wt_seq)-1,"delSeqLen":del_seq_len,"wtSeqPos":str(wt_diff_pos[0]+1) + '-' + str(wt_diff_pos[1]+1),"mutSeqPos":str(mut_diff_pos[0]+1) + '-' + str(mut_diff_pos[1]+1)})
+   curr_effect=pd.Series({"altPept": mut_pept, "event_id": events_table.loc[index,"event_id"], "effectId": effectId, "gene": transcript.gene.gene_name,"orf_effect": coding_effect,"aa_effect": aa_effect,"refPept": wt_pept,"refIsoform": transcript_info["matching_isoform"],"insSeqLen": novel_seq_len,"refSeqLen": len(wt_seq)-1,"delSeqLen":del_seq_len,"refSeqPos":str(wt_diff_pos[0]+1) + '-' + str(wt_diff_pos[1]+1),"altSeqPos":str(mut_diff_pos[0]+1) + '-' + str(mut_diff_pos[1]+1)})
    #print(curr_effect)
    effectDF=effectDF.append(curr_effect,ignore_index=True)
 
@@ -176,7 +176,7 @@ for index,row in events_table.iterrows():
  Bio.SeqIO.write(novel_list,out_handle,"fasta")
  novel_fasta.write(out_handle.getvalue())
  effectDF.topEffect=effectDF.effectId==top_effectId
- effectDF.to_csv(peptides_table,header=False)
+ effectDF.to_csv(peptides_table,header=False,index=False)
  events_table.loc[index,"effect_type"]=top_coding_effect
  events_table.loc[index,"top_effect_transcript"]=top_effectId.split('_')[0]
 

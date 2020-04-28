@@ -5,11 +5,11 @@ import sys,os,io,re
 path=sys.argv[1]
 name=sys.argv[2]
 
-out_file='.'.join([name,"unique.fasta"])
+out_file=path + "/" + '.'.join([name,"unique.fasta"])
 if os.path.exists(out_file):
  os.remove(out_file)
 
-out_table='.'.join([name,"seqTable.csv"])
+out_table=path + "/" + '.'.join([name,"seqTable.csv"])
 if os.path.exists(out_table):
  os.remove(out_table)
 
@@ -22,7 +22,7 @@ for file in filelist:
 unique_seq=dict()
 
 for fasta in fastalist:
- for record in Bio.SeqIO.parse(fasta,"fasta"):
+ for record in Bio.SeqIO.parse(path + "/" + fasta,"fasta"):
   header=record.description
   seq=str(record.seq)
   fields=header.split(' ')
