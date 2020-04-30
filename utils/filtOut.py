@@ -24,6 +24,7 @@ info_col=colnames.values[0:4]
 info_col=np.append(info_col,'event_jid')
 try:
     sample_table=pd.read_table(sample_file,names=['samples','group'])
+    sample_table.samples=sample_table.samples.apply(lambda x: x.replace('-','.'))
 except:
     sample_names=colnames[range(np.where(colnames=='event_jid')[0][0]+1,len(colnames))]
     sample_table=pd.DataFrame({'sample':sample_names})
@@ -37,7 +38,8 @@ for group in group_list:
 filt_events=pd.DataFrame(columns=select_col)
 count_col=select_col[list(map(lambda x: x.endswith('counts'),select_col))]
 for file in out_files:
-    curr_events=pd.read_csv(path + "/" + file,usecols=np.append(info_col,sample_table.samples))
+    print(file)
+    curr_events=pd.read_csv(path + "/" + file,usecols=np.append(info_col,sample_table.samples.unique()))
     for group in group_list:
         sample_names=sample_table.samples[sample_table.group==group]
         curr_events[group + '_high_counts']=curr_events[sample_names].apply(lambda x: np.sum(x>thresh),axis=1)
