@@ -33,6 +33,8 @@ elif event_type=="MUT":
  col_types={"contig":str,"event_id":str,"gene":str,"exon_pre_end":int,"exon1_start":int,"exon1_end":int,"exon2_start":int,"exon2_end":int,"exon_aft_start":int,"event_jid":str}
 elif event_type=="A3" or event_type=="A5":
  col_types={"contig":str,"event_id":str,"gene":str,"strand":str,"exon_const_start":int,"exon_const_end":int,"exon_alt1_start":int,"exon_alt1_end":int,"exon_alt2_start":int,"exon_alt2_end":int,"event_jid":str}
+elif event_type=="ALL":
+ col_types={"contig":str,"event_id":str,"gene":str,"strand":str,"event_jid":str}
 else:
  print("ERROR: invalid event type " + event_type + ".\nValid event types are IR, ES, MUT, A3 or A5")
  sys.exit(1)
@@ -63,7 +65,8 @@ for index,row in events_table.iterrows():
  effectDF=pd.DataFrame(columns=effectCol)
  wt_list=[]
  novel_list=[]
- event_coords=bb.get_event_coords(row,event_type)
+ event_coords=bb.jid_to_coords(events_table.loc[index,"event_jid"])
+ #event_coords=bb.get_event_coords(row,event_type)
  iso1_str=events_table.loc[index,"event_jid"].split("g.")[1].split(">")[0]
  iso2_str=events_table.loc[index,"event_jid"].split("g.")[1].split(">")[1].split("[")[0]
  transcript_table=bb.find_matching_transcripts(ensembl,row["gene"],event_coords)

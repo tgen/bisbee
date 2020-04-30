@@ -162,6 +162,19 @@ def get_event_coords(event_info,event_type):
   event_coords=event_coords.append({"isoform":"iso1","start":event_info["exon_alt2_end"],"end":event_info["exon_const_start"]},ignore_index=True)
  return event_coords
 
+def jid_to_coords(event_jid):
+ event_coords=pd.DataFrame(columns=("isoform","start","end"))
+ iso1_coords=event_jid.split("g.")[1].split(">")[0].split('_')
+ for coord in iso1_coords:
+  if not coord=="NONE":
+   event_coords=event_coords.append({"isoform":"iso1","start":int(coord.split('j')[0]),"end":int(coord.split('j')[1])},ignore_index=True)
+ iso2_coords=event_jid.split("g.")[1].split(">")[1].split("[")[0].split('_')
+ for coord in iso2_coords:
+  if not coord=="NONE":
+   event_coords=event_coords.append({"isoform":"iso2","start":int(coord.split('j')[0]),"end":int(coord.split('j')[1])},ignore_index=True)
+ return event_coords
+
+
 def find_matching_transcripts(ensembl,gene_id,event_coords):
  try:
   transcript_ids=ensembl.transcript_ids_of_gene_id(gene_id)
