@@ -36,7 +36,7 @@
 - name: score_{{ event["name"] }}
   cmd: |
    module load R/3.5.2
-   Rscript {{ bisbeePath }}/stats/outlierScore.R  {{ refname }}.{{ event["name"]}}.bisbeeFit.csv {{ testname }}.{{ event["name"]}}.bisbeeCounts.csv {{ testname }}.{{ refname }}.{{ event["name"]}}
+   Rscript {{ bisbeePath }}/stats/outlierScore.R  {{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv {{ testname }}.{{ event["name"]}}.bisbeeCounts.csv {{ testname }}.{{ refname }}.{{ event["name"]}}
   after:
    - prepTest_{{ event["name"] }}
    - combine_fit_{{ event["name"] }}
