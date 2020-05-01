@@ -25,7 +25,7 @@ filt_events=pd.merge(filt_events,filt_effects,on="event_jid",how="left")
 
 top_file=path + "/" + protName + ".top.peptides.csv"
 top_pept=pd.read_csv(top_file)
-top_pept['event_jid']=top_pept.effectId.apply(lambda x: x.partition('_')[2])
+#top_pept['event_jid']=top_pept.effectId.apply(lambda x: x.partition('_')[2])
 
 filt_events=pd.merge(filt_events,top_pept,on="event_jid",how="left")
 if not ('event_type' in filt_events.columns):
