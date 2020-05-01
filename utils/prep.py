@@ -118,7 +118,7 @@ if event_type=='MUT':
     iso1_str=data.apply(lambda x: str(x['exon_pre_end'])+'j'+str(x['exon1_start'])+'_'+str(x['exon1_end'])+'j'+str(x['exon_aft_start']),axis=1)
     iso2_str=data.apply(lambda x: str(x['exon_pre_end'])+'j'+str(x['exon2_start'])+'_'+str(x['exon2_end'])+'j'+str(x['exon_aft_start']),axis=1)
 
-data['event_jid']=data['contig'] + ':g.' + iso1_str + '>' + iso2_str + "[spl" + event_type + "]"
+data['event_jid']=data['contig'] + 's' + data['strand'] + ':g.' + iso1_str + '>' + iso2_str + "[spl" + event_type + "]"
 if spladder_ver==1 and (event_type=='A3' or event_type=='A5'):
     iso1=pd.DataFrame(np.transpose(f['iso1'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso2',select_samples.samples[idx2])))
     iso2=pd.DataFrame(np.transpose(f['iso2'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso1',select_samples.samples[idx2])))
