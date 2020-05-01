@@ -1,3 +1,10 @@
+- name: setup
+  cmd: |
+   mkdir counts
+   mkdir prot
+   mkdir -p outlier/fit/tmp
+   mkdir outlier/scores
+   mkdir diff
 
 {% for event in event_list %}
 {% for n in range(event["n_max_test"]+1) %}
