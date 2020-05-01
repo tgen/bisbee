@@ -42,8 +42,9 @@ peptTable.rename(columns={"seq_header":"iso2_header"},inplace=True)
 peptTable["novelSeq"]=peptTable.novelSeq_x | peptTable.novelSeq_y
 peptTable.drop(["seq_id","novelSeq_x","novelSeq_y"],inplace=True,axis=1)
 
-peptTable.sort_values(by=["event_id","novelPept","novelSeq","insSeqLen","refSeqLen"],ascending=[True,False,True,False,False],inplace=True)
-topPeptTable=peptTable.drop_duplicates(subset="event_id")
+peptTable["event_jid"]=peptTable.effectId.apply(lambda x: x.partition('_')[2])
+peptTable.sort_values(by=["event_jid","novelPept","novelSeq","insSeqLen","refSeqLen"],ascending=[True,False,True,False,False],inplace=True)
+topPeptTable=peptTable.drop_duplicates(subset="event_jid")
 peptTable.topEffect=peptTable.effectId.isin(topPeptTable.effectId)
 topPeptTable.topEffect=True
 
