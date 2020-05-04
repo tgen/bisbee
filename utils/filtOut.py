@@ -1,6 +1,7 @@
 import pandas as pd
 import sys,os,io,re
 import numpy as np
+import time
 
 path=sys.argv[1]
 outName=sys.argv[2]
@@ -32,28 +33,31 @@ except:
     select_group='test'
 
 group_list=sample_table.group.unique()
+print(group_list)
 select_col=info_col
 for group in group_list:
     select_col=np.append(select_col,[group + '_high_counts', group + '_median_score_high',group + '_low_counts',group + '_median_score_low',group + '_median_score_all'])
 filt_events=pd.DataFrame(columns=select_col)
 count_col=select_col[list(map(lambda x: x.endswith('counts'),select_col))]
 for file in out_files:
+    t0= time.time()
     print(file)
     curr_events=pd.read_csv(path + "/" + file,usecols=np.append(info_col,sample_table.samples.unique()))
     for group in group_list:
         sample_names=sample_table.samples[sample_table.group==group]
-        curr_events[group + '_high_counts']=curr_events[sample_names].apply(lambda x: np.sum(x>thresh),axis=1)
-        curr_events[group + '_median_score_high']=curr_events[sample_names].apply(lambda x: np.nanmedian(x[x>thresh]),axis=1)
-        curr_events[group + '_low_counts']=curr_events[sample_names].apply(lambda x: np.sum(x<(-thresh)),axis=1)
-        curr_events[group + '_median_score_low']=curr_events[sample_names].apply(lambda x: np.nanmedian(x[x<(-thresh)]),axis=1)
+        curr_events[group + '_high_counts']=(curr_events[sample_names]>thresh).sum(1)
+        curr_events[group + '_median_score_high']=(curr_events[sample_names]>thresh).median(axis=1)
+        curr_events[group + '_low_counts']=(curr_events[sample_names]<(-thresh)).sum(1)
+        curr_events[group + '_median_score_low']=(curr_events[sample_names]<(-thresh)).median(axis=1)
         curr_events[group + '_median_score_all']=curr_events[sample_names].median(axis=1)
-
     sIdx=curr_events.loc[:,[select_group + '_high_counts',select_group + '_low_counts']].max(axis=1)>=sample_count
     try:
         idx=sIdx & (curr_events.loc[:,[exclude_group + '_high_counts',exclude_group + '_low_counts']].max(axis=1)<=exclude_count)
     except:
         idx=sIdx
     filt_events=filt_events.append(curr_events.loc[idx,select_col])
+    t1 = time.time() - t0
+    print("Time elapsed: ", t1 - t0,flush=True)
 
 filt_events.insert(column=select_group + '_total_out',loc=5,
                    value=filt_events.loc[:,[select_group + '_high_counts',select_group + '_low_counts']].sum(axis=1))
