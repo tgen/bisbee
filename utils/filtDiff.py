@@ -22,7 +22,10 @@ filt_events=pd.DataFrame(columns=select_col)
 for file in diff_files:
     print(file)
     curr_events=pd.read_csv(path + "/" + file,usecols=select_col)
-    filt_events=filt_events.append(curr_events[curr_events.ll_ratio>thresh])
+    if np.isnan(thresh):
+        filt_events=filt_events.append(curr_events)
+    else:
+        filt_events=filt_events.append(curr_events[curr_events.ll_ratio>thresh])
 
 filt_events=filt_events.sort_values(by="ll_ratio",ascending=False)
 filt_events['event_type']=filt_events.event_id.apply(lambda x: x.split('_')[0]+'_'+x.split('_')[1])

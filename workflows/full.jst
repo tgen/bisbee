@@ -113,7 +113,7 @@
 - name: annot_diff_{{ group1 }}_{{ group2 }}
   cmd: |
    module load python/3.6.0
-   python {{ bisbeePath }}/utils/annotate.py {{ testname }}.{{ group1 }}vs{{ group2 }}.bisbeeDiff.thresh{{ "%2.1f" % diff_thresh }}.csv prot {{ testname }}
+   python {{ bisbeePath }}/utils/annotate.py {{ testname }}.{{ group1 }}vs{{ group2 }}.bisbeeDiff.thresh{{ "%2.1f" % diff_thresh | float(default='None') }}.csv prot {{ testname }}
   after: filt_diff_{{ group1 }}_{{ group2 }}
 {% endfor %}
 {% endfor %}
@@ -139,7 +139,7 @@
 - name: comb_diff
   cmd: |
    module load python/3.6.0
-   python {{ bisbeePath }}/utils/combine.py $PWD {{ testname }}. .bisbeeDiff.thresh{{ "%2.1f" % diff_thresh }}.anno.csv ll_ratio,group_increased_alt
+   python {{ bisbeePath }}/utils/combine.py $PWD {{ testname }}. .bisbeeDiff.thresh{{ "%2.1f" % diff_thresh | float(default='None') }}.anno.csv ll_ratio,group_increased_alt
   after-re: annot_diff_.*
 
 - name: comb_out
