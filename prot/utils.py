@@ -177,7 +177,7 @@ def jid_to_coords(event_jid):
 
 def find_matching_transcripts(ensembl,gene_id,event_coords):
  try:
-  transcript_ids=ensembl.transcript_ids_of_gene_id(gene_id)
+  transcript_ids=ensembl.transcript_ids_of_gene_id(gene_id[0:15])
  except:
   print('Warning: ' + gene_id + ' not found')
   transcript_ids=[]
