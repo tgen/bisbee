@@ -35,8 +35,8 @@ filt_events.insert(column='event_cat',loc=5,value=None)
 filt_events.loc[filt_events.event_type=='alt_3prime','event_cat']='Alt'
 filt_events.loc[filt_events.event_type=='alt_5prime','event_cat']='Alt'
 filt_events.loc[filt_events.event_type=='mutex_exons','event_cat']='MutEx'
-filt_events.loc[(filt_events.event_type=='exon_skip') & (filt_events.refIsoform=='iso1'),'event_cat']='ExonInc'
-filt_events.loc[(filt_events.event_type=='exon_skip') & (filt_events.refIsoform=='iso2'),'event_cat']='ExonSkip'
+filt_events.loc[(filt_events.event_type=='exon_skip') & (filt_events.refIsoform=='iso2'),'event_cat']='ExonInc'
+filt_events.loc[(filt_events.event_type=='exon_skip') & (filt_events.refIsoform=='iso1'),'event_cat']='ExonSkip'
 filt_events.loc[(filt_events.event_type=='intron_retention') & (filt_events.refIsoform=='iso2'),'event_cat']='IntronRet'
 filt_events.loc[(filt_events.event_type=='intron_retention') & (filt_events.refIsoform=='iso1'),'event_cat']='IntronExc'
 
