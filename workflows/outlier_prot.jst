@@ -60,6 +60,7 @@
   cmd: |
    module load python/3.6.0
    python {{ bisbeePath }}/utils/filtOut.py outlier/scores {{ testname }}.{{ refname }} {{ out_thresh }} {{ out_count }} {{ test_samples }} {{ group }} {{ exclude_group }} {{ exclude_count }}
+  sbatch_args: [-t, "7-00:00:00"]
   after-re: score_.*
 {% endfor %}
 
@@ -67,7 +68,8 @@
 - name: protSeq_{{ group }}
   cmd: |
    module load python/3.6.0
-   python {{ bisbeePath }}/prot/build.py {{ testname }}.{{ refname }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.csv ALL {{ aapad }} prot/{{ testname }}.{{ group }} {{ ensembl }} {{ ref }}
+   python {{ bisbeePath }}/prot/build.py {{ testname }}.{{ refname }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.max{{ exclude_count }}{{ exclude_group }}.csv ALL {{ aapad }} prot/{{ testname }}.{{ group }} {{ ensembl }} {{ ref }}
+  sbatch_args: [-t, "7-00:00:00"]
   after: filt_out_{{ group }}
 {% endfor %}
 
@@ -82,7 +84,6 @@
    module load python/3.6.0
    python {{ bisbeePath }}/prot/getTop.py prot {{ testname }}
   after: getUnique
-
 
 {% for group in group_list %}
 - name: annot_out_{{ group }}
