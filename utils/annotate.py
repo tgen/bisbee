@@ -68,5 +68,5 @@ filt_events.loc[filt_events.orf_effect=='StartLost','effect_cat']='ProteinLoss'
 filt_events.loc[filt_events.coding_transcript_effect=='NonCoding','effect_cat']='NonCoding'
 
 filt_events.to_csv(event_file.replace('.csv','.anno.csv'))
-summary=filt_events.pivot_table(index=['event_cat','aa_change_type','effect_cat'],columns=['group_increased_alt'],values=['effect_jid'],aggfunc=len,fill_value=0)
+summary=filt_events.pivot_table(index=['event_cat','aa_change_type','effect_cat'],columns=['group_increased_alt'],values=['event_jid'],aggfunc=len,fill_value=0)
 summary.to_csv(event_file.replace('.csv','.anno.summary.csv'))
