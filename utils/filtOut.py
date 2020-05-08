@@ -12,7 +12,7 @@ if len(sys.argv)>5:
     select_group=sys.argv[6]
 if len(sys.argv)>7:
     exclude_group=sys.argv[7]
-    exclude_count=sys.argv[8]
+    exclude_count=int(sys.argv[8])
 
 filelist=os.listdir(path)
 out_files=[]
@@ -36,7 +36,7 @@ group_list=sample_table.group.unique()
 print(group_list)
 select_col=info_col
 for group in group_list:
-    select_col=np.append(select_col,[group + '_high_counts', group + '_median_score_high',group + '_low_counts',group + '_median_score_low',group + '_median_score_all'])
+    select_col=np.append(select_col,[group + '_high_counts',group + '_low_counts',group + '_median_score',group + '_mean_score',group + '_abs_max_score'])
 filt_events=pd.DataFrame(columns=select_col)
 count_col=select_col[list(map(lambda x: x.endswith('counts'),select_col))]
 for file in out_files:
@@ -46,10 +46,10 @@ for file in out_files:
     for group in group_list:
         sample_names=sample_table.samples[sample_table.group==group]
         curr_events[group + '_high_counts']=(curr_events[sample_names]>thresh).sum(1)
-        curr_events[group + '_median_score_high']=(curr_events[sample_names]>thresh).median(axis=1)
         curr_events[group + '_low_counts']=(curr_events[sample_names]<(-thresh)).sum(1)
-        curr_events[group + '_median_score_low']=(curr_events[sample_names]<(-thresh)).median(axis=1)
-        curr_events[group + '_median_score_all']=curr_events[sample_names].median(axis=1)
+        curr_events[group + '_median_score']=curr_events[sample_names].median(axis=1)
+        curr_events[group + '_mean_score']=curr_events[sample_names].mean(axis=1)
+        curr_events[group + '_abs_max_score']=curr_events[sample_names].abs().max(axis=1)
     sIdx=curr_events.loc[:,[select_group + '_high_counts',select_group + '_low_counts']].max(axis=1)>=sample_count
     try:
         idx=sIdx & (curr_events.loc[:,[exclude_group + '_high_counts',exclude_group + '_low_counts']].max(axis=1)<=exclude_count)
@@ -61,13 +61,11 @@ for file in out_files:
 
 filt_events.insert(column=select_group + '_total_out',loc=5,
                    value=filt_events.loc[:,[select_group + '_high_counts',select_group + '_low_counts']].sum(axis=1))
-filt_events.insert(column=select_group + '_median_score_abs_max',loc=6,
-                   value=filt_events.loc[:,[select_group + '_median_score_high',select_group + '_median_score_low']].abs().sum(axis=1))
-filt_events=filt_events.sort_values(by=[select_group + "_total_out",select_group + "_median_score_abs_max"],ascending=False)
+filt_events=filt_events.sort_values(by=[select_group + "_total_out",select_group + "_abs_max_score"],ascending=False)
 filt_events['event_type']=filt_events.event_id.apply(lambda x: x.split('_')[0]+'_'+x.split('_')[1])
 
-filt_events.insert(column='PSI_higher',loc=7,value='Ref')
-filt_events.insert(column='PSI_lower',loc=8,value='Ref')
+filt_events.insert(column='PSI_higher',loc=6,value='Ref')
+filt_events.insert(column='PSI_lower',loc=7,value='Ref')
 filt_events.loc[filt_events[select_group + '_high_counts']>=sample_count,'PSI_higher']=select_group
 filt_events.loc[filt_events[select_group + '_low_counts']>=sample_count,'PSI_lower']=select_group
 
