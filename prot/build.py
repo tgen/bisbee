@@ -97,23 +97,9 @@ for index,row in events_table.iterrows():
   curr_effect_score=-5
   transcript=ensembl.transcript_by_id(tid)
   wt_seq=Bio.Seq.translate(transcript.coding_sequence)
-  if (transcript_info["matching_isoform"]=="iso1") or (transcript_info["matching_isoform"]=="iso2"):
-   novel_junc=event_coords.loc[event_coords.isoform!=transcript_info["matching_isoform"]]
-   coding_coord=pd.DataFrame(transcript.coding_sequence_position_ranges,columns=['start','end'])
-   coding_coord=coding_coord.append(pd.Series({'start':min(transcript.stop_codon_positions),'end':max(transcript.stop_codon_positions)}),ignore_index=True).sort_values(by="start")
-   overlap=bb.find_overlap(coding_coord,[event_coords.start.min(),event_coords.end.max()])
-   if novel_junc.size>0 and overlap.any():
-    new_coord=pd.DataFrame(columns=["start","end"])
-    new_coord=new_coord.append({'start':coding_coord[overlap].start.iloc[0],'end':novel_junc.start.iloc[0]},ignore_index=True)
-    new_coord=new_coord.append(pd.DataFrame({'start':novel_junc.end.iloc[0:-1].values,'end':novel_junc.start.iloc[1:].values}),ignore_index=True)
-    new_coord=new_coord.append({'start':novel_junc.end.iloc[-1],'end':coding_coord[overlap].end.iloc[-1]},ignore_index=True)
-    new_coord=new_coord.append(coding_coord.loc[overlap==False],ignore_index=True).sort_values(by="start")
-   elif overlap.any():
-    new_coord=pd.DataFrame(columns=["start","end"])
-    new_coord=new_coord.append({'start':coding_coord[overlap].start.iloc[0],'end':coding_coord[overlap].end.iloc[-1]},ignore_index=True)
-    new_coord=new_coord.append(coding_coord.loc[overlap==False],ignore_index=True).sort_values(by="start")
-   else:
-    new_coord=coding_coord
+  coding_coord=pd.DataFrame(transcript.coding_sequence_position_ranges,columns=['start','end'])
+  coding_coord=coding_coord.append(pd.Series({'start':min(transcript.stop_codon_positions),'end':max(transcript.stop_codon_positions)}),ignore_index=True).sort_values(by="start")
+  new_coord=bb.get_new_coord(transcript_table["matching_isoform"],event_coords,coding_coord)
    #print(novel_junc)
    #print(coding_coord)
    #print(overlap)

@@ -179,36 +179,54 @@ def find_matching_transcripts(ensembl,gene_id,event_coords):
  try:
   transcript_ids=ensembl.transcript_ids_of_gene_id(gene_id[0:15])
  except:
-  print('Warning: ' + gene_id + ' not found')
+  print('Warning: ' + gene_id[0:15] + ' not found')
   transcript_ids=[]
  transcript_table=pd.DataFrame(columns=["coding","matching_isoform"],index=transcript_ids)
  for tid in transcript_ids:
   transcript=ensembl.transcript_by_id(tid)
-  exons=pd.DataFrame(transcript.exon_intervals,columns=["start","end"]).sort_values(by="start")
-  event_region=[event_coords.start.min(),event_coords.end.max()]
-  exons=exons[find_overlap(exons,event_region)]
-  junctions=pd.DataFrame(columns=["start","end"])
-  junctions["end"]=exons.start[1:].values
-  junctions["start"]=exons.end[0:-1].values
   if transcript.biotype!='protein_coding' or not transcript.contains_stop_codon or not transcript.contains_start_codon:
    transcript_table.loc[tid,"coding"]=False
   else:
    transcript_table.loc[tid,"coding"]=True
-  ### add handling of IR
-  #print(event_coords)
-  #print(exons)
-  if junctions.equals(event_coords.loc[event_coords.isoform=="iso2",["start","end"]].reset_index(drop=True).astype(int)):
-   transcript_table.loc[tid,"matching_isoform"]="iso2"
-  elif sum(event_coords.isoform=="iso1")==0:
-   if len(exons.start)>0:
-    if event_coords.start[0]>exons.start.iloc[0] and event_coords.end[0]<exons.end.iloc[0]:
-     transcript_table.loc[tid,"matching_isoform"]="iso1"
-    else:
-     transcript_table.loc[tid,"matching_isoform"]="none"
-   else:
-    transcript_table.loc[tid,"matching_isoform"]="none"
-  elif junctions.equals(event_coords.loc[event_coords.isoform=="iso1",["start","end"]].reset_index(drop=True).astype(int)):
-   transcript_table.loc[tid,"matching_isoform"]="iso1"
-  else:
-   transcript_table.loc[tid,"matching_isoform"]="none"
+  transcript_table.loc[tid,"matching_isoform"]=get_matching_isoform(transcript,event_coords)
  return transcript_table
+
+def get_matching_isoform(transcript,event_coords):
+ exons=pd.DataFrame(transcript.exon_intervals,columns=["start","end"]).sort_values(by="start")
+ event_region=[event_coords.start.min(),event_coords.end.max()]
+ exons=exons[find_overlap(exons,event_region)]
+ junctions=pd.DataFrame(columns=["start","end"])
+ junctions["end"]=exons.start[1:].values
+ junctions["start"]=exons.end[0:-1].values
+ if junctions.equals(event_coords.loc[event_coords.isoform=="iso2",["start","end"]].reset_index(drop=True).astype(int)):
+  matching_isoform="iso2"
+ elif sum(event_coords.isoform=="iso1")==0:
+  if len(exons.start)>0:
+   if event_coords.start[0]>exons.start.iloc[0] and event_coords.end[0]<exons.end.iloc[0]:
+    matching_isoform="iso1"
+   else:
+    matching_isoform="none"
+  else:
+    matching_isoform="none"
+ elif junctions.equals(event_coords.loc[event_coords.isoform=="iso1",["start","end"]].reset_index(drop=True).astype(int)):
+   matching_isoform="iso1"
+ else:
+   matching_isoform="none"
+ return matching_isoform
+
+def get_new_coord(matching_isoform,event_coords,old_coord):
+ novel_junc=event_coords.loc[event_coords.isoform!=matching_isoform]
+ overlap=find_overlap(old_coord,[event_coords.start.min(),event_coords.end.max()])
+ if novel_junc.size>0 and overlap.any():
+  new_coord=pd.DataFrame(columns=["start","end"])
+  new_coord=new_coord.append({'start':old_coord[overlap].start.iloc[0],'end':novel_junc.start.iloc[0]},ignore_index=True)
+  new_coord=new_coord.append(pd.DataFrame({'start':novel_junc.end.iloc[0:-1].values,'end':novel_junc.start.iloc[1:].values}),ignore_index=True)
+  new_coord=new_coord.append({'start':novel_junc.end.iloc[-1],'end':old_coord[overlap].end.iloc[-1]},ignore_index=True)
+  new_coord=new_coord.append(old_coord.loc[overlap==False],ignore_index=True).sort_values(by="start")
+ elif overlap.any():
+  new_coord=pd.DataFrame(columns=["start","end"])
+  new_coord=new_coord.append({'start':old_coord[overlap].start.iloc[0],'end':old_coord[overlap].end.iloc[-1]},ignore_index=True)
+  new_coord=new_coord.append(old_coord.loc[overlap==False],ignore_index=True).sort_values(by="start")
+ else:
+  new_coord=old_coord
+ return new_coord
