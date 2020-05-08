@@ -89,7 +89,7 @@
 - name: annot_out_{{ group }}
   cmd: |
    module load python/3.6.0
-   python {{ bisbeePath }}/utils/annotate.py {{ testname }}.{{ refname }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.csv prot {{ testname }}
+   python {{ bisbeePath }}/utils/annotate.py {{ testname }}.{{ refname }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.max{{ exclude_count }}{{ exclude_group }}.csv prot {{ testname }}
   after:
    - filt_out_{{ group }}
    - getTop
