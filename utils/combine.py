@@ -23,8 +23,8 @@ data=data.rename(columns=dict(zip(data_col,data_col_names)))
 
 for name,file in data_files.items():
     new_data=pd.read_csv(file,index_col="event_jid")
-    new_data_col_names=map(lambda x: x+"_"+name,data_col)
-    data_col_names=data_col_names + list(new_data_col_names)
+    new_data_col_names=list(map(lambda x: x+"_"+name,data_col))
+    data_col_names=data_col_names + new_data_col_names
     new_data=new_data.rename(columns=dict(zip(data_col,new_data_col_names)))
     data=data.combine_first(new_data)
 
