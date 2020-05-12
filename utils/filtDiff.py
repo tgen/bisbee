@@ -39,5 +39,5 @@ filt_events.loc[filt_events[group_names[0]]>filt_events[group_names[1]],'PSI_low
 filt_events.loc[filt_events[group_names[0]]<filt_events[group_names[1]],'PSI_lower']=group_names[0].replace('fitPSI_','')
 
 filt_events.to_csv(diffName + '.bisbeeDiff.thresh' + str(thresh) + '.csv')
-summary=filt_events.pivot_table(index=['event_type'],columns=['PSI_higher'],values=['effect_jid'],aggfunc=len,fill_value=0)
+summary=filt_events.pivot_table(index=['event_type'],columns=['PSI_higher'],values=['event_jid'],aggfunc=len,fill_value=0)
 summary.to_csv(diffName + '.bisbeeDiff.thresh' + str(thresh) + '.summary.csv')
