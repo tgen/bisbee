@@ -148,7 +148,7 @@ for index,row in events_table.iterrows():
    curr_effect_score=-1
   else:
    aa_effect="Unknown"
-   effectId=tid + "_" +  events_table.loc[index,"event_jid"]
+  effectId=tid + "_" +  events_table.loc[index,"event_jid"]
   if (curr_effect_score>top_effect_score) or ((curr_effect_score==top_effect_score) and (max_wt_seq>len(wt_seq))):
    top_coding_effect=aa_effect + "_" + coding_effect
    top_effectId=effectId
