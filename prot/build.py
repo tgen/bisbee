@@ -104,56 +104,56 @@ for index,row in events_table.iterrows():
    #print(coding_coord)
    #print(overlap)
    #print(new_coord)
-   (mut_seq,coding_effect)=bb.make_prot_from_coord(transcript,new_coord,ref)
+  (mut_seq,coding_effect)=bb.make_prot_from_coord(transcript,new_coord,ref)
    #print(mut_seq)
-   (wt_diff_pos,mut_diff_pos)=bb.find_seq_diff(wt_seq,mut_seq)
+  (wt_diff_pos,mut_diff_pos)=bb.find_seq_diff(wt_seq,mut_seq)
    #print(wt_diff_pos)
    #print(mut_diff_pos)
-   desc=' '.join(["GN=" + transcript.gene.gene_name,"ID=" + events_table.loc[index,"event_id"] + "_" + transcript_info["matching_isoform"],"JID=" + events_table.loc[index,"event_jid"],"PC=" + str(wt_diff_pos[0]) + "-" + str(wt_diff_pos[1])])
-   wt_list.append(Bio.SeqRecord.SeqRecord(id="en|" + transcript.id,description=desc,seq=Bio.Seq.Seq(wt_seq)))
-   if transcript_info["matching_isoform"]=="iso1":
-    desc=' '.join(["GN=" + transcript.gene.gene_name,"ID=" + events_table.loc[index,"event_id"] + "_iso2","JID=" + events_table.loc[index,"event_jid"],"PC=" + str(mut_diff_pos[0]) + "-" + str(mut_diff_pos[1])])
-    novel_list.append(Bio.SeqRecord.SeqRecord(id= "en|" +transcript.id + ":g." + iso1_str + ">" + iso2_str,description=desc,seq=Bio.Seq.Seq(mut_seq)))
-   else:
-    desc=' '.join(["GN=" + transcript.gene.gene_name,"ID=" + events_table.loc[index,"event_id"] + "_iso1","JID=" + events_table.loc[index,"event_jid"],"PC=" + str(mut_diff_pos[0]) + "-" + str(mut_diff_pos[1])])
-    novel_list.append(Bio.SeqRecord.SeqRecord(id="en|" + transcript.id + ":g." + iso2_str + ">" + iso1_str,description=desc,seq=Bio.Seq.Seq(mut_seq)))
+  desc=' '.join(["GN=" + transcript.gene.gene_name,"ID=" + events_table.loc[index,"event_id"] + "_" + transcript_info["matching_isoform"],"JID=" + events_table.loc[index,"event_jid"],"PC=" + str(wt_diff_pos[0]) + "-" + str(wt_diff_pos[1])])
+  wt_list.append(Bio.SeqRecord.SeqRecord(id="en|" + transcript.id,description=desc,seq=Bio.Seq.Seq(wt_seq)))
+  if transcript_info["matching_isoform"]=="iso1":
+   desc=' '.join(["GN=" + transcript.gene.gene_name,"ID=" + events_table.loc[index,"event_id"] + "_iso2","JID=" + events_table.loc[index,"event_jid"],"PC=" + str(mut_diff_pos[0]) + "-" + str(mut_diff_pos[1])])
+   novel_list.append(Bio.SeqRecord.SeqRecord(id= "en|" +transcript.id + ":g." + iso1_str + ">" + iso2_str,description=desc,seq=Bio.Seq.Seq(mut_seq)))
+  else:
+   desc=' '.join(["GN=" + transcript.gene.gene_name,"ID=" + events_table.loc[index,"event_id"] + "_iso1","JID=" + events_table.loc[index,"event_jid"],"PC=" + str(mut_diff_pos[0]) + "-" + str(mut_diff_pos[1])])
+   novel_list.append(Bio.SeqRecord.SeqRecord(id="en|" + transcript.id + ":g." + iso2_str + ">" + iso1_str,description=desc,seq=Bio.Seq.Seq(mut_seq)))
 #"mutPept","event_id","event_jid","gene_name","transcript_id","orf_effect","topEffect","wtPept","sourceName","novelSeqLen","wtSeqLen","delSeqLen"]
-   if not math.isnan(mut_diff_pos[0]):
-    mut_pept=mut_seq[max(mut_diff_pos[0]-aapad,0):mut_diff_pos[1]+aapad]
-    wt_pept=wt_seq[max(mut_diff_pos[0]-aapad,0):wt_diff_pos[1]+aapad]
-    novel_seq_len=mut_diff_pos[1]-mut_diff_pos[0]
-    del_seq_len=wt_diff_pos[1]-wt_diff_pos[0]
-   else:
-    mut_pept=''
-    wt_pept=''
-    novel_seq_len=float('nan')
-    del_seq_len=float('nan')
-   if (coding_effect=="InFrame") and math.isnan(mut_diff_pos[0]):
-    aa_effect="Silent"
-    curr_effect_score=-4
-   elif del_seq_len==len(wt_seq)-1:
-    aa_effect="ProteinLoss"
-    curr_effect_score=-2
-   elif (novel_seq_len>0) and (del_seq_len>0):
-    aa_effect="Substitution"
-    curr_effect_score=novel_seq_len
-   elif (novel_seq_len>0):
-    aa_effect="Insertion"
-    curr_effect_score=novel_seq_len
-   elif (del_seq_len>0) and (wt_diff_pos[1]==len(wt_seq)-1):
-    aa_effect="Truncation"
-    curr_effect_score=-3
-   elif (del_seq_len>0):
-    aa_effect="Deletion"
-    curr_effect_score=-1
-   else:
-    aa_effect="Unknown"
+  if not math.isnan(mut_diff_pos[0]):
+   mut_pept=mut_seq[max(mut_diff_pos[0]-aapad,0):mut_diff_pos[1]+aapad]
+   wt_pept=wt_seq[max(mut_diff_pos[0]-aapad,0):wt_diff_pos[1]+aapad]
+   novel_seq_len=mut_diff_pos[1]-mut_diff_pos[0]
+   del_seq_len=wt_diff_pos[1]-wt_diff_pos[0]
+  else:
+   mut_pept=''
+   wt_pept=''
+   novel_seq_len=float('nan')
+   del_seq_len=float('nan')
+  if (coding_effect=="InFrame") and math.isnan(mut_diff_pos[0]):
+   aa_effect="Silent"
+   curr_effect_score=-4
+  elif del_seq_len==len(wt_seq)-1:
+   aa_effect="ProteinLoss"
+   curr_effect_score=-2
+  elif (novel_seq_len>0) and (del_seq_len>0):
+   aa_effect="Substitution"
+   curr_effect_score=novel_seq_len
+  elif (novel_seq_len>0):
+   aa_effect="Insertion"
+   curr_effect_score=novel_seq_len
+  elif (del_seq_len>0) and (wt_diff_pos[1]==len(wt_seq)-1):
+   aa_effect="Truncation"
+   curr_effect_score=-3
+  elif (del_seq_len>0):
+   aa_effect="Deletion"
+   curr_effect_score=-1
+  else:
+   aa_effect="Unknown"
    effectId=tid + "_" +  events_table.loc[index,"event_jid"]
-   if (curr_effect_score>top_effect_score) or ((curr_effect_score==top_effect_score) and (max_wt_seq>len(wt_seq))):
-     top_coding_effect=aa_effect + "_" + coding_effect
-     top_effectId=effectId
-     top_effect_score=curr_effect_score
-     max_wt_seq=len(wt_seq)
+  if (curr_effect_score>top_effect_score) or ((curr_effect_score==top_effect_score) and (max_wt_seq>len(wt_seq))):
+   top_coding_effect=aa_effect + "_" + coding_effect
+   top_effectId=effectId
+   top_effect_score=curr_effect_score
+   max_wt_seq=len(wt_seq)
    curr_effect=pd.Series({"altPept": mut_pept, "event_id": events_table.loc[index,"event_id"], "effectId": effectId, "gene": transcript.gene.gene_name,"orf_effect": coding_effect,"aa_effect": aa_effect,"refPept": wt_pept,"refIsoform": transcript_info["matching_isoform"],"insSeqLen": novel_seq_len,"refSeqLen": len(wt_seq)-1,"delSeqLen":del_seq_len,"refSeqPos":str(wt_diff_pos[0]+1) + '-' + str(wt_diff_pos[1]+1),"altSeqPos":str(mut_diff_pos[0]+1) + '-' + str(mut_diff_pos[1]+1)})
    #print(curr_effect)
    effectDF=effectDF.append(curr_effect,ignore_index=True)
