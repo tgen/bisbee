@@ -21,6 +21,7 @@ data_col=columns[np.where(columns=='event_jid')[0][0]+1:]
 total_counts=anno_table.pivot_table(columns=anno_col,values='event_jid',aggfunc=len)
 total_counts.index = ["_".join(v) for v in total_counts.index.values]
 out_counts=pd.DataFrame(index=total_counts.index,columns=data_col,data=0)
+score_counts=pd.DataFrame(index=total_counts.index,columns=data_col,data=0)
 
 for file in out_files:
     curr_data=pd.read_csv(path + "/" + file)
@@ -28,6 +29,11 @@ for file in out_files:
     curr_counts=pd.DataFrame(curr_data.pivot_table(index=anno_col,values=data_col,aggfunc=lambda x: sum(abs(x)>thresh)))
     curr_counts.index = ["_".join(v) for v in curr_counts.index.values]
     out_counts=out_counts.add(curr_counts,fill_value=0)
+    curr_counts=pd.DataFrame(curr_data.pivot_table(index=anno_col,values=data_col,aggfunc=lambda x: sum(not np.isnan(x))))
+    curr_counts.index = ["_".join(v) for v in curr_counts.index.values]
+    score_counts=score_counts.add(curr_counts,fill_value=0)
 
-out_counts['total']=total_counts
-out_counts.transpose().to_csv(anno_file.replace('anno.csv','sampleCounts.csv'))
+
+#out_counts['total']=total_counts
+out_counts.transpose().to_csv(anno_file.replace('anno.csv','samplePassCounts.csv'))
+score_counts.transpose().to_csv(anno_file.replace('anno.csv','sampleScoreCounts.csv'))
