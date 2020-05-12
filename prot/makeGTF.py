@@ -12,7 +12,7 @@ gtf=pd.DataFrame(columns=["seqname","feature","start","end","strand","attribute"
 
 for index,row in events_table.iterrows():
     try:
-        tid,event_jid=row["effectId"].partition('_')
+        tid,sep,event_jid=row["effectId"].partition('_')
     except:
         continue
     event_coords=bb.jid_to_coords(event_jid)
