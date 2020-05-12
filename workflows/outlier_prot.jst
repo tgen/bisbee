@@ -94,3 +94,12 @@
    - filt_out_{{ group }}
    - getTop
  {% endfor %}
+
+{% for group in group_list %}
+- name: count_out_{{ group }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/outSampleCounts.py outlier/scores {{ testname }}.{{ refname }} {{ out_thresh }} {{ testname }}.{{ refname }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.max{{ exclude_count }}{{ exclude_group }}.anno.csv
+  after:
+   - annot_out_{{ group }}
+ {% endfor %}
