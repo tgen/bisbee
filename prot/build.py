@@ -99,7 +99,7 @@ for index,row in events_table.iterrows():
   wt_seq=Bio.Seq.translate(transcript.coding_sequence)
   coding_coord=pd.DataFrame(transcript.coding_sequence_position_ranges,columns=['start','end'])
   coding_coord=coding_coord.append(pd.Series({'start':min(transcript.stop_codon_positions),'end':max(transcript.stop_codon_positions)}),ignore_index=True).sort_values(by="start")
-  new_coord=bb.get_new_coord(transcript_table["matching_isoform"],event_coords,coding_coord)
+  new_coord=bb.get_new_coord(transcript_info["matching_isoform"],event_coords,coding_coord)
    #print(novel_junc)
    #print(coding_coord)
    #print(overlap)
