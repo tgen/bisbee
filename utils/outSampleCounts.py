@@ -29,7 +29,7 @@ for file in out_files:
     curr_counts=pd.DataFrame(curr_data.pivot_table(index=anno_col,values=data_col,aggfunc=lambda x: sum(abs(x)>thresh)))
     curr_counts.index = ["_".join(v) for v in curr_counts.index.values]
     out_counts=out_counts.add(curr_counts,fill_value=0)
-    curr_counts=pd.DataFrame(curr_data.pivot_table(index=anno_col,values=data_col,aggfunc=lambda x: sum(not np.isnan(x))))
+    curr_counts=pd.DataFrame(curr_data.pivot_table(index=anno_col,values=data_col,aggfunc=lambda x: sum(np.isnan(x)==False)))
     curr_counts.index = ["_".join(v) for v in curr_counts.index.values]
     score_counts=score_counts.add(curr_counts,fill_value=0)
 
