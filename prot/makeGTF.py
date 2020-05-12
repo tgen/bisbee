@@ -11,11 +11,11 @@ ensembl=pyensembl.EnsemblRelease(ensemble_release)
 gtf=pd.DataFrame(columns=["seqname","feature","start","end","strand","attribute"])
 
 for index,row in events_table.iterrows():
-    event_coords=bb.jid_to_coords(events_table.loc[index,"event_jid"])
     try:
-        tid=row["effectId"].split('_')[0]
+        tid,event_jid=row["effectId"].partition('_')
     except:
         continue
+    event_coords=bb.jid_to_coords(event_jid)
     transcript=ensembl.transcript_by_id(tid)
     isoform=bb.get_matching_isoform(transcript,event_coords)
     attribute='gene_id ' + transcript.gene_id + '; transcript_id ' + row["effectId"]
