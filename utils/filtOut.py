@@ -21,8 +21,10 @@ for file in filelist:
   out_files.append(file)
 
 colnames=pd.read_csv(path + "/" + out_files[0],nrows=1).columns
-info_col=colnames.values[0:4]
-info_col=np.append(info_col,'event_jid')
+info_col=["contig","gene","strand","event_id","confirmed","event_jid"]
+info_col=np.intersect1d(info_col,colnames)
+#info_col=colnames.values[0:4]
+#info_col=np.append(info_col,'event_jid')
 try:
     sample_table=pd.read_table(sample_file,names=['samples','group'])
     sample_table.samples=sample_table.samples.apply(lambda x: x.replace('-','.'))
