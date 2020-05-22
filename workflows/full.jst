@@ -102,7 +102,6 @@
    python {{ bisbeePath }}/utils/filtDiff.py diff {{ testname }}.{{ group1 }}vs{{ group2 }} {{ diff_thresh}}
   after-re:
    - diff_.*
-   - getTop
 {% endfor %}
 {% endfor %}
 
@@ -114,7 +113,9 @@
   cmd: |
    module load python/3.6.0
    python {{ bisbeePath }}/utils/annotate.py {{ testname }}.{{ group1 }}vs{{ group2 }}.bisbeeDiff.thresh{{ "%2.1f" % diff_thresh | float(default='None') }}.csv prot {{ testname }}
-  after: filt_diff_{{ group1 }}_{{ group2 }}
+  after:
+   - filt_diff_{{ group1 }}_{{ group2 }}
+   - getTop
 {% endfor %}
 {% endfor %}
 
