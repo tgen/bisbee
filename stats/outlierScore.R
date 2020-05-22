@@ -37,5 +37,6 @@ if(length(idx1)>0){
 if(length(idx2)>0){
   scores[idx2,]=t(sapply(idx2,function(x) -log(pmax(pbbinom(iso2[x,],iso1[x,]+iso2[x,],beta[x],alpha[x],log.p=FALSE),.Machine$double.xmin))))
 }
+scores[iso1+iso2==0]=NaN
 
 write.table(cbind(data[,info_idx],scores),outname,row.names=FALSE,append = FALSE,sep=",")
