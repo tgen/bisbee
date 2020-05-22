@@ -32,12 +32,14 @@ sample_names=np.array(list(map(lambda x: x.decode('UTF-8'),f['strains'])))
 try:
     select_samples=pd.read_table(sample_file,usecols=[0],names=["samples"])
 except:
+    print('no sample file')
     select_samples=sample_names
-if spladder_ver==2:
-    samples,idx1,idx2=np.intersect1d(sample_names,select_samples.samples.apply(lambda x: x[0:24]),return_indices=True)
-else:
-    samples,idx1,idx2=np.intersect1d(sample_names,select_samples.samples,return_indices=True)
+#if spladder_ver==2:
+#    samples,idx1,idx2=np.intersect1d(sample_names,select_samples['samples'].apply(lambda x: x[0:24]),return_indices=True)
+#else:
+samples,idx1,idx2=np.intersect1d(sample_names,select_samples.samples,return_indices=True)
 idx1.sort()
+print(samples)
 
 data=pd.DataFrame({'gene':gene_names[gene_idx],'strand':gene_strand[gene_idx],'contig':gene_chr[gene_idx]})
 data['event_id']=list(map(lambda x: event_dict[event_type] + '_' + str(x),range(start_pos+1,end_pos+1)))
