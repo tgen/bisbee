@@ -24,8 +24,8 @@ if(exists('groups')){
   groups=levels(sample_table$V2) 
 }
 
-g1idx=sample_names %in% sample_table$V1[unclass(sample_table$V2)==1]
-g2idx=sample_names %in% sample_table$V1[unclass(sample_table$V2)==2]
+g1idx=sample_names %in% make.names(sample_table$V1[unclass(sample_table$V2)==1])
+g2idx=sample_names %in% make.names(sample_table$V1[unclass(sample_table$V2)==2])
 sidx=g1idx | g2idx
 print(sample_names[sidx])
 
