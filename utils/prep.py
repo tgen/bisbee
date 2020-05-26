@@ -34,12 +34,9 @@ try:
 except:
     print('no sample file')
     select_samples=sample_names
-#if spladder_ver==2:
-#    samples,idx1,idx2=np.intersect1d(sample_names,select_samples['samples'].apply(lambda x: x[0:24]),return_indices=True)
-#else:
 samples,idx1,idx2=np.intersect1d(sample_names,select_samples.samples,return_indices=True)
 idx1.sort()
-print(samples)
+
 
 data=pd.DataFrame({'gene':gene_names[gene_idx],'strand':gene_strand[gene_idx],'contig':gene_chr[gene_idx]})
 data['event_id']=list(map(lambda x: event_dict[event_type] + '_' + str(x),range(start_pos+1,end_pos+1)))
@@ -122,11 +119,11 @@ if event_type=='MUT':
 
 data['event_jid']=data['contig'] + 's' + data['strand'] + ':g.' + iso1_str + '>' + iso2_str + "[spl" + event_type + "]"
 if spladder_ver==1 and (event_type=='A3' or event_type=='A5'):
-    iso1=pd.DataFrame(np.transpose(f['iso1'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso2',select_samples.samples[idx2])))
-    iso2=pd.DataFrame(np.transpose(f['iso2'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso1',select_samples.samples[idx2])))
+    iso1=pd.DataFrame(np.transpose(f['iso2'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso1',sample_names[idx1])))
+    iso2=pd.DataFrame(np.transpose(f['iso1'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso2',sample_names[idx1])))
 else:
-    iso1=pd.DataFrame(np.transpose(f['iso1'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso1',select_samples.samples[idx2])))
-    iso2=pd.DataFrame(np.transpose(f['iso2'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso2',select_samples.samples[idx2])))
+    iso1=pd.DataFrame(np.transpose(f['iso1'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso1',sample_names[idx1])))
+    iso2=pd.DataFrame(np.transpose(f['iso2'][idx1,start_pos:end_pos]),columns=list(map(lambda x: x + '_iso2',sample_names[idx1])))
 if spladder_ver==1 and event_type=='MUT':
     temp1=iso1.loc[switch_idx,:].copy()
     temp2=iso2.loc[switch_idx,:].copy()
