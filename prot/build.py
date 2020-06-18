@@ -92,7 +92,7 @@ for index,row in events_table.iterrows():
  top_effect_type=''
  top_effect_score=-5
  max_wt_seq=-1
- for tid,transcript_info in transcript_table.loc[transcript_table.coding==True].iterrows():
+ for tid,transcript_info in transcript_table.loc[(transcript_table.coding==True) & ((transcript_table.matching_isoform=="iso1") | (transcript_table.matching_isoform=="iso2"))].iterrows():
   #print(tid)
   curr_effect_score=-5
   transcript=ensembl.transcript_by_id(tid)
