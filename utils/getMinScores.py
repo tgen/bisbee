@@ -16,8 +16,9 @@ scores1=pd.read_csv(scoresFile1,index_col="event_jid",usecols=np.append("event_j
 scores2=pd.read_csv(scoresFile2,index_col="event_jid",usecols=np.append("event_jid",sample_names))
 minScores=pd.DataFrame(index=scores1.index,columns=scores1.columns)
 use1=scores1.abs()<=scores2.abs()
+use2=scores1.abs()>scores2.abs()
 minScores[use1]=scores1[use1]
-minScores[use1==False]=scores2[use1==False]
+minScores[use2]=scores2[use2]
 minScores=info.join(minScores)
 minScores.insert(column="event_jid",loc=5,value=minScores.index)
 minScores.to_csv(outname + ".minScores.bisbeeOutlier.csv",index=False)
