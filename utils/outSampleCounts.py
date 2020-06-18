@@ -9,6 +9,7 @@ anno_file=sys.argv[4]
 
 anno_table=pd.read_csv(anno_file)
 anno_col=["event_cat","group_increased_alt","aa_change_type","effect_cat"]
+anno_col=list(np.intersect1d(anno_col,anno_table.columns))
 
 filelist=os.listdir(path)
 out_files=[]
@@ -26,6 +27,7 @@ score_counts=pd.DataFrame(index=total_counts.index,columns=data_col,data=0)
 for file in out_files:
     curr_data=pd.read_csv(path + "/" + file)
     curr_data=pd.merge(anno_table,curr_data,on='event_jid',how='inner')
+    curr_data[anno_col].fillna('NA')
     curr_counts=pd.DataFrame(curr_data.pivot_table(index=anno_col,values=data_col,aggfunc=lambda x: sum(abs(x)>thresh)))
     curr_counts.index = ["_".join(v) for v in curr_counts.index.values]
     out_counts=out_counts.add(curr_counts,fill_value=0)
