@@ -33,7 +33,7 @@ try:
     select_samples=pd.read_table(sample_file,usecols=[0],names=["samples"])
 except:
     print('no sample file')
-    select_samples=sample_names
+    select_samples=pd.DataFrame(sample_names,columns=["samples"])
 samples,idx1,idx2=np.intersect1d(sample_names,select_samples.samples,return_indices=True)
 idx1.sort()
 
