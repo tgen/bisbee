@@ -14,7 +14,7 @@
   cmd: |
    module load python/3.6.0
    python {{ bisbeePath }}/utils/filtOut.py outlier/scores {{ testname }}.{{ ref1name }}.{{ ref2name }} {{ out_thresh }} {{ out_count }} {{ test_samples }} {{ group }}
-  sbatch_args: [-t, "7-00:00:00"]
+  sbatch_args: [-t, "2-00:00:00"]
   after-re: minScore_.*
 {% endfor %}
 
@@ -23,7 +23,7 @@
   cmd: |
    module load python/3.6.0
    python {{ bisbeePath }}/prot/build.py {{ testname }}.{{ ref1name }}.{{ ref2name }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.csv ALL {{ aapad }} prot/{{ testname }}.{{ group }} {{ ensembl }} {{ ref }}
-  sbatch_args: [-t, "7-00:00:00"]
+  sbatch_args: [-t, "2-00:00:00"]
   after: filt_out_{{ group }}
 {% endfor %}
 
@@ -49,11 +49,15 @@
    - getTop
  {% endfor %}
 
-{% for group in group_list %}
-- name: count_out_{{ group }}
+- name: comb_out
   cmd: |
    module load python/3.6.0
-   python {{ bisbeePath }}/utils/outSampleCounts.py outlier/scores {{ testname }}.{{ ref1name }}.{{ ref2name }} {{ out_thresh }} {{ testname }}.{{ ref1name }}.{{ ref2name }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.anno.csv
+   python {{ bisbeePath }}/utils/combine.py $PWD {{ testname }}.{{ ref1name }}.{{ ref2name }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }} .anno.csv group_increased_alt
+  after-re: annot_out_.*
+
+- name: count_out
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/outSampleCounts.py outlier/scores {{ testname }}.{{ ref1name }}.{{ ref2name }} {{ out_thresh }} {{ testname }}.{{ ref1name }}.{{ ref2name }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}comb.anno.csv
   after:
-   - annot_out_{{ group }}
- {% endfor %}
+   - comb_out
