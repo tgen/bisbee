@@ -10,6 +10,6 @@
 - name: score_{{ event["name"] }}
   cmd: |
    module load R/3.5.2
-   Rscript {{ bisbeePath }}/stats/outlierDiff.R  {{ testname }}.{{ event["name"]}}.bisbeeCounts.csv {{ testsamples }} {{ testname }}.{{ event["name"]}} {{ maxW }}
+   Rscript {{ bisbeePath }}/stats/diff.R  {{ testname }}.{{ event["name"]}}.bisbeeCounts.csv {{ testsamples }} {{ testname }}.{{ event["name"]}} {{ maxW }}
   after: prepTest_{{ event["name"] }}
 {% endfor %}
