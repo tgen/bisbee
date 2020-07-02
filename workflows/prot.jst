@@ -1,19 +1,21 @@
-
 {% for event in event_list %}
-- name: protSeq_{{ event }}
+{% for n in range(event["n_max_test"]+1) %}
+- name: protSeq_{{ event["name"] }}_{{ n }}
   cmd: |
    module load python/3.6.0
-   python {{ bisbeePath }}/prot/build.py {{ testname }}.{{ event }}.bisbeeCounts.csv {{ event }} {{ aapad }} {{ testname }} {{ ensembl }} {{ ref }}
+   python {{ bisbeePath }}/prot/build.py counts/{{ testname }}.{{ event['name'] }}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ event['name'] }} {{ aapad }} prot/{{ testname }}.c{{ "%03d" % n }} {{ ensembl }} {{ ref }}
+  after: prepTest_{{ event["name"] }}_{{ n }}
+{% endfor %}
 {% endfor %}
 
 - name: getUnique
   cmd: |
    module load python/3.6.0
-   python {{ bisbeePath }}/prot/getUnique.py $PWD {{ testname }}
+   python {{ bisbeePath }}/prot/getUnique.py prot {{ testname }}
   after-re: protSeq_.*
 
 - name: getTop
   cmd: |
    module load python/3.6.0
-   python {{ bisbeePath }}/prot/getTop.py $PWD {{ testname }}
+   python {{ bisbeePath }}/prot/getTop.py prot {{ testname }}
   after: getUnique
