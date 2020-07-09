@@ -100,7 +100,8 @@ if event_type=='IR':
     iso2_str=data.apply(lambda x: str(x['exon1_end'])+'j'+str(x['exon2_start']),axis=1)
 
 if event_type=='MUT':
-    event_coord=np.reshape(event_pos,(len(gene_idx),8),(0,2,1))
+    tmp_reshape = np.transpose(event_pos, (0,2,1))
+    event_coord=np.reshape(tmp_reshape,(len(gene_idx),8))
     data['exon_pre_end']=event_coord[:,1]
     data['exon1_start']=event_coord[:,2]+1
     data['exon1_end']=event_coord[:,3]

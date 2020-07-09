@@ -1,6 +1,20 @@
 # bisbee
 alternative splicing analysis pipeline
 
+## Dependencies
+ - R (3.5.2 or later)
+   - stats4
+   - fitdistrplus
+   - extraDistr
+ - python (3.6.0 or later)
+   - pandas
+   - numpy
+   - pyensembl
+   - Bio
+
+## Workflows
+Workflows are provided for use in the [jetstream](https://github.com/tgen/jetstream) pipeline framework.
+
 ## Prepare input (currently only implemented for spladder)
 
 `python utils/prep.py spladder_counts_file event_type outname spladder_version [sample_file] [chunk_num] [chunksize]`
@@ -143,12 +157,11 @@ Also see jetstream workflow: [workflows/prot.jst](workflows/prot.jst)
  
  output file columns:
   - event_cat: type of splicing event
-    - Alt: alternate 3 or 5 prime splice site
+    - Alt3: alternate 3  prime splice site
+    - Alt5: alternate 5 prime splice site
     - MutEx: mutually exclusive exons
-    - ExonInc: exon inclusion in the group indicated in the "group_higher" column
-    - ExonSkip: exon skipped in the group indicated in the "group_higher" column
-    - IntronRet: intron retained in the group indicated in the "group_higher" column
-    - IntronExc: intron excluded in the group indicated in the "group_higher" column
+    - *group*ExonInc: exon skip/inclusion with *group* having more inclusion
+    - *group*IntronRet: intron retained/excluded with *group* having more retention
   - group_higher: sample group with more of the isoform resulting in the sequence in the "mutPept" column
   - aa_change_type: type of amino acid change relative to ensembl
     - Canonical: protein coding event with both isoforms are in ensembl
