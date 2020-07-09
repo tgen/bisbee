@@ -1,9 +1,15 @@
+- name: setup
+  cmd: |
+   mkdir counts
+   mkdir prot
+
 {% for event in event_list %}
 {% for n in range(event["n_max_test"]+1) %}
 - name: prepTest_{{ event["name"] }}_{{ n }}
   cmd: |
    module load python/3.6.0
    python {{ bisbeePath }}/utils/prep.py  {{ event["test_file"] }} {{ event["name"]}} counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ ref_spladder_ver }} {{ test_samples }} {{ n }} {{ chunk_size }}
+  after: setup
 {% endfor %}
 {% endfor %}
 
