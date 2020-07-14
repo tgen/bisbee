@@ -19,7 +19,7 @@ for file in filelist:
 
 columns=pd.read_csv(path + "/" + out_files[0],nrows=1).columns
 data_col=columns[np.where(columns=='event_jid')[0][0]+1:]
-total_counts=anno_table.pivot_table(columns=anno_col,values='event_jid',aggfunc=len)
+total_counts=anno_table.pivot_table(index=anno_col,values='event_jid',aggfunc=len)
 total_counts.index = ["_".join(v) for v in total_counts.index.values]
 out_counts=pd.DataFrame(index=total_counts.index,columns=data_col,data=0)
 score_counts=pd.DataFrame(index=total_counts.index,columns=data_col,data=0)
