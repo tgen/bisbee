@@ -1,5 +1,7 @@
-# bisbee
-alternative splicing analysis pipeline
+# Bisbee
+alternative splicing analysis package.  
+
+Bisbee perfoms differential splicing analysis, splicing outlier analysis, and splice isoform protein sequence prediction.  Each of these analysis steps may be run independently or may be combined into a pipeline using the workflows below.  Bisbee also provides utility scripts for extracting data, annotating, filtering and summarizing results.  Bisbee has been developed and tested using splice variant detection data from [SplAdder](https://github.com/ratschlab/spladder).
 
 ## Dependencies
  - R (3.5.2 or later)
@@ -13,7 +15,39 @@ alternative splicing analysis pipeline
    - Bio
 
 ## Workflows
-Workflows are provided for use in the [jetstream](https://github.com/tgen/jetstream) pipeline framework.
+Workflows are provided for use in the [jetstream](https://github.com/tgen/jetstream) pipeline framework. The workflows will divide the dataset into chunks and performs each step in parallel on the chunk.  The filter step at the end of the workflows will pull significant events into a single file.  If jetstream is run on a computing cluster with a slurm scheduler, the "--backend slurm" option may be used to submit each task as a slurm job.  If jetstream is run with the (default) local backend, each task will be launched as a process on the local machine.  
+
+To run the full Bisbee workflow:
+`jetstream run [--backend slurm] -C config.yaml workflows/full.jst`
+
+The fields below are required in the config.yaml
+```yaml
+test_samples: [file path string] text file containing table of samples for testing, first column has sample names and second column has group name (diff and outlier)
+ref_samples: [file path string] text file containing list of reference samples names for fitting the outlier model (outlier)
+chunk_size: [int] number of events to include in each file chunk for parallel processing (all)
+maxW: [float] parameter for diff model, recommended value 200 (diff)
+maxBeta: [float] parameter for outlier scoring, recommended value 80 (outlier)
+diff_thresh: [float] threshold for differential splicing scores, recommended value 8 (diff)
+out_thresh: [float] threshold for filtering outlier scores, recommended value 10 (outlier)
+out_count: [int] number of samples meeting outlier criteria required (outlier)
+testname: [string] name of test samples for use in output file names (outlier and diff)
+refname: [string] name of ref samples for use in output file names (outlier)
+bisbeePath: [directory path string] path to bisbee installation (all)
+ref_spladder_ver: [1 or 2] version of SplAdder used to detect splice variants in reference samples (all)
+test_spladder_ver: [1 or 2] version of SplAdder used to detect splice variants in test samples (all)
+aapad: [int] number of amino acids to prepend and postpend to altered amino acids in peptide output (prot)
+ensemble: [int] version of ensembl to use to get transcript information (prot)
+ref: [file path string] reference genome fasta file
+group_list: [list of strings] name of groups to compare, for diff splicing will perform all pairwise comparisons by group, for outlier will summarize outlier counts by group (outlier and diff)
+event_list: [list] input data by event type
+ - name: [A3, A5, ES, IR, or MUT] name of event type (all)
+   test_file: [file path string] spladder counts.hdf5 file for the event type above for the test samples (all)
+   n_max_test: [int] floor(event count in test_file divided by the chunk_size) (all)
+   ref_file: [file path string] spladder counts.hdf5 file for the event type above for the reference samples (outlier)
+   n_max_ref: [int] floor(event count in ref_file divided by the chunk_size) (outlier)
+```
+
+Workflows for subsets of the analysis are also provided.  The analysis type requiring the parameter are noted in parenthesis above.
 
 ## Prepare input (currently only implemented for spladder)
 
