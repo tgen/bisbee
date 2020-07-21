@@ -1,0 +1,47 @@
+group_list:
+ - Brain
+ - Ovary
+ - SI
+ - Tonsil
+event_list:
+ - name: A3
+   test_file: spladder2_WangKuster/merge_graphs_alt_3prime_C3.counts.hdf5
+   ref_file: spladder2_WangKuster/merge_graphs_alt_3prime_C3.counts.hdf5
+   n_max_ref: 6
+   n_max_test: 6
+ - name: A5
+   test_file: spladder2_WangKuster/merge_graphs_alt_5prime_C3.counts.hdf5
+   ref_file: spladder2_WangKuster/merge_graphs_alt_5prime_C3.counts.hdf5
+   n_max_ref: 4
+   n_max_test: 4
+ - name: ES
+   test_file: spladder2_WangKuster/merge_graphs_exon_skip_C3.counts.hdf5
+   ref_file: spladder2_WangKuster/merge_graphs_exon_skip_C3.counts.hdf5
+   n_max_ref: 10
+   n_max_test: 10
+ - name: IR
+   test_file: spladder2_WangKuster/merge_graphs_intron_retention_C3.counts.hdf5
+   ref_file: spladder2_WangKuster/merge_graphs_intron_retention_C3.counts.hdf5
+   n_max_ref: 4
+   n_max_test: 4
+ - name: MUT
+   test_file: spladder2_WangKuster/merge_graphs_mutex_exons_C3.counts.hdf5
+   ref_file: spladder2_WangKuster/merge_graphs_mutex_exons_C3.counts.hdf5
+   n_max_ref: 0
+   n_max_test: 0
+test_samples: WangKuster_testSamples.txt 
+ref_samples: WangKuster_lowerGI.txt
+chunk_size: 10000
+maxW: 200
+maxBeta: 80
+diff_thresh: nan
+out_thresh: 0
+out_count: 0
+testname: WangKuster
+refname: lowerGI
+bisbeePath: /home/rhalperin/bisbee
+ref_spladder_ver: 2
+test_spladder_ver: 2
+aapad: 9
+ensembl: 95
+ref: /home/tgenref/homo_sapiens/grch38_hg38/hg38tgen/genome_reference/GRCh38tgen_decoy.fa

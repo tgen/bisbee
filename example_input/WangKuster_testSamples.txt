@@ -1,0 +1,13 @@
+brain_3b_TSMRU_V102.star	Brain
+brain_3c_TSMRU_V103.star	Brain
+brain_a_TSMRU_V29.star	Brain
+smallintestine_4a_TSMRU_V151.star	SI
+smallintestine_4b_TSMRU_V152.star	SI
+smallintestine_4c_TSMRU_V153.star	SI
+smallintestine_4d_TSMRU_V156.star	SI
+ovary_6a_TSMRU_V233.star	Ovary
+ovary_6b_TSMRU_V234.star	Ovary
+ovary_8a_TSMRU_ovary_8a.star	Ovary
+tonsil_8a1_TSMRU_tonsil_8a1.star	Tonsil
+tonsil_8b1_TSMRU_tonsil_8b1.star	Tonsil
+tonsil_8e1_TSMRU_tonsil_8e1.star	Tonsil
