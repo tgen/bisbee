@@ -19,8 +19,8 @@ eventCount=nrow(data)
 print(paste('sampleCount:',sampleCount))
 print(paste('eventCount:',eventCount))
 
-iso1=sapply(data[,iso1_idx],as.numeric)
-iso2=sapply(data[,iso2_idx],as.numeric)
+iso1=sapply(data[,iso1_idx, drop=FALSE],as.numeric)
+iso2=sapply(data[,iso2_idx, drop=FALSE],as.numeric)
 info_idx=seq(1,iso1_idx[1]-1)
 
 idx=match(data$event_jid,psiStats$event_jid)
