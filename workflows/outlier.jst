@@ -10,7 +10,7 @@
 - name: prepTest_{{ event["name"] }}_{{ n }}
   cmd: |
    module load python/3.6.0
-   python {{ bisbeePath }}/utils/prep.py  {{ event["test_file"] }} {{ event["name"]}} counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ ref_spladder_ver }} {{ test_samples }} {{ n }} {{ chunk_size }}
+   python {{ bisbeePath }}/utils/prep.py  {{ event["test_file"] }} {{ event["name"]}} counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ test_spladder_ver }} {{ test_samples }} {{ n }} {{ chunk_size }}
   after: setup
 {% endfor %}
 {% endfor %}
