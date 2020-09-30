@@ -22,7 +22,7 @@ for file in filelist:
 
 colnames=pd.read_csv(path + "/" + out_files[0],nrows=1).columns
 info_col=["contig","gene","strand","event_id","confirmed","event_jid"]
-info_col=np.intersect1d(info_col,colnames)
+info_col=list(np.intersect1d(info_col,colnames))
 #info_col=colnames.values[0:4]
 #info_col=np.append(info_col,'event_jid')
 try:
@@ -40,6 +40,8 @@ select_col=info_col
 for group in group_list:
     select_col=np.append(select_col,[group + '_high_counts',group + '_low_counts',group + '_median_score',group + '_mean_score',group + '_abs_max_score'])
 filt_events=pd.DataFrame(columns=select_col)
+select_samples=list(sample_table.samples[sample_table.group==select_group])
+filt_data=pd.DataFrame(columns=info_col + select_samples)
 count_col=select_col[list(map(lambda x: x.endswith('counts'),select_col))]
 for file in out_files:
     t0= time.time()
@@ -58,6 +60,7 @@ for file in out_files:
     except:
         idx=sIdx
     filt_events=filt_events.append(curr_events.loc[idx,select_col])
+    filt_data=filt_data.append(curr_events.loc[idx,info_col + select_samples])
     t1 = time.time() - t0
     print("Time elapsed: ", t1 - t0,flush=True)
 
@@ -78,5 +81,6 @@ except:
     name=name + '.csv'
 
 filt_events.to_csv(name)
+filt_data.to_csv(name.replace('.csv','.scores.csv'))
 summary=filt_events.pivot_table(index=['event_type'],columns=['PSI_higher'],values=['event_jid'],aggfunc=len,fill_value=0)
 summary.to_csv(name.replace('.csv','.summary.csv'))
