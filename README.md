@@ -73,6 +73,15 @@ example:
 
 `python utils/prep.py merge_graphs_alt_3prime.counts.hdf5 IR testSamples.IR 2`
 
+output event_jid column:
+ - unique identifier for each splice events to faciliate comparisons across studies
+ - format: `contig + 's' + strand + ':g' + iso1_junc + '>' + iso2_junc + '[spl' + event_type + ']'`
+   - contig: contig containing the event
+   - strand: strand of the transcript containing the event
+   - iso1/2_junc: coordinates of exon-exon junctions for isoform 1/2 seperated by `j`, if the isoform has more than one junction, `_` indicates an exon between the junctions 
+ - example: `15s-:g.65312610j65313852_65313954j65316010>65312610j65316010[splES]` indicates and exon skipping event on chromosome 15 on a negative strand transcript.  Isoform one has an exon included starting at position 65313852 and ending at 65313954, while isoform two skips that exon and has a junction from 65312610 to 65316010.
+
+
 ## Statistical analysis
 ### differential splicing
 
