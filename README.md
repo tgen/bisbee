@@ -55,7 +55,7 @@ Workflows for subsets of the analysis are also provided.  The analysis type requ
 
  - spladder_counts_file: \*counts.hdf5 file from spladder
  - event_type: A3 (alt_3prime), A5 (alt_5prime), ES (exon_skip), IR (intron_retention), or MUT (mutually exclusive exons)
- - outname: name for output file
+ - outname: prefix for name for output file (bisbeeCounts.csv will be added)
  - spladder_version: 1 for counts files from SplAdder 1.x to correct for changes in later versions
  - sample_file: file with list of samples to include in output if only a subset of the samples from the counts file are desired (optional)
  - chunk_num: output events starting at number chunk_num x chunk_size (optional - intended for analyzing large files in pipelines)
@@ -63,36 +63,39 @@ Workflows for subsets of the analysis are also provided.  The analysis type requ
 
 example:
 
-`python utils/prep.py merge_graphs_alt_3prime.counts.hdf5 IR testSamples.IR.bisbeeCounts.txt 2`
+`python utils/prep.py merge_graphs_alt_3prime.counts.hdf5 IR testSamples.IR 2`
 
 ## Statistical analysis
 ### differential splicing
 
-`Rscript stats/diff.R  bisbee_counts_file sample_table outname maxW`
+`Rscript stats/diff.R  bisbee_counts_file sample_table outname maxW [group1] [group2]`
  
  - bisbee_counts_file: output from utils/prep.py
  - sample_table: tab delimited text file with sample ids in first column and sample group in second column, no header
- - outname: output file name
+ - outname: prefix of name for the output file name (bisbeeDiff.csv will be added)
  - maxW: constraint on W parameter, recommended value 200
+ - group1: 1st group to use in comparison from sample_table (optional - use if more than two groups in sample_table)
+ - group2: 2nd group to use in comparison from sample_table (optional - use if more than two groups in sample_table)
 
 example:
 
-`Rscript stats/diff.R testSamples.IR.bisbeeCounts.csv sample_table.txt testSamples.IR.bisbeeDiff.txt 200`
+`Rscript stats/diff.R testSamples.IR.bisbeeCounts.csv sample_table.txt testSamples.IR 200`
 
 Also see jetstream workflow: [workflows/diff.jst](workflows/diff.jst)
 
 ### outlier analysis
 1. Fit model to reference samples
 
-`Rscript stats/outlierFit.R reference_bisbee_counts_file maxBeta outname`
+`Rscript stats/outlierFit.R reference_bisbee_counts_file maxBeta outname [sample_file]`
 
 - reference_bisbee_counts_file: output of utils/prep.py for samples in reference set
 - maxBeta: constraint on Beta parameter, recommended value 80
-- outname: name of output file
+- outname: prefix of name for output file (bisbeeFit.csv will be added)
+- sample_file: text file with list of samples to use (optional - use if only a subset of samples in the counts file should be used as the reference samples)
 
 example:
 
-`Rscript stats/outlierFit.R refSamples.IR.bisbeeCounts.txt 80 refSamples.IR.bisbeeFit.txt`
+`Rscript stats/outlierFit.R refSamples.IR.bisbeeCounts.csv 80 refSamples.IR.bisbeeFit`
 
 2. Score test samples
 
@@ -100,11 +103,11 @@ example:
 
  - bisbee_fit_out: output from stats/outlierFit.R on reference samples
  - test_bisbee_counts: output from utils/prep.py on test samples
- - outname: name of output file
+ - outname: prefix for name of output file (bisbeeOutlier.csv will be added)
 
 example:
 
-`Rscript stats/outlierScore.R refSamples.IR.bisbeeFit.txt testSamples.IR.bisbeeCounts.txt  test.ref.IR.bisbeeScores.txt`
+`Rscript stats/outlierScore.R refSamples.IR.bisbeeFit.csv testSamples.IR.bisbeeCounts.csv  test.ref.IR`
 
 Also see jetstream workflow: [workflows/outlier.jst](workflows/outlier.jst)
 
@@ -114,8 +117,8 @@ Also see jetstream workflow: [workflows/outlier.jst](workflows/outlier.jst)
 
 `python prot/build.py bisbee_file event_type aapad outname ensemble_release ref_fasta`
 
- - bisbee_file: output of utils/prep.py
- - event_type: A3 (alt_3prime), A5 (alt_5prime), ES (exon_skip), IR (intron_retention), or MUT (mutually exclusive exons)
+ - bisbee_file: output of utils/prep.py or utils/filtOut.py or utils/filtDiff.py
+ - event_type: A3 (alt_3prime), A5 (alt_5prime), ES (exon_skip), IR (intron_retention), or MUT (mutually exclusive exons) or ALL (combined event types file)
  - aapad: number of amino acids to pad around effected sequence in peptide output
  - outname: name of output file
  - ensemble_release: version of ensemble to use
@@ -123,7 +126,7 @@ Also see jetstream workflow: [workflows/outlier.jst](workflows/outlier.jst)
  
  example: 
  
- `python prot/build.py testSamples.IR.bisbeeCounts.csv IR 9 testSamples.bisbeeProt ensemble_release hg19.fa`
+ `python prot/build.py testSamples.IR.bisbeeCounts.csv IR 9 testSamples.bisbeeProt 74 hg19.fa`
  
  2. find unique protein sequences
  
@@ -133,7 +136,7 @@ Also see jetstream workflow: [workflows/outlier.jst](workflows/outlier.jst)
   - prot_prefix: outname used with prot/build.py
   
   example:
-  `python prot/getUnique.py bisbeeProt testSamples.bisbeeProt
+  `python prot/getUnique.py prot testSamples
   
   3. select top transcript effect per event
   
@@ -158,7 +161,7 @@ Also see jetstream workflow: [workflows/prot.jst](workflows/prot.jst)
  
  example:
  
- `python utils/filtDiff.py bisbeeDiff testSamples 8`
+ `python utils/filtDiff.py diff testSamples 8`
  
  ### outlier results filtering
 
@@ -196,7 +199,7 @@ Also see jetstream workflow: [workflows/prot.jst](workflows/prot.jst)
     - MutEx: mutually exclusive exons
     - *group*ExonInc: exon skip/inclusion with *group* having more inclusion
     - *group*IntronRet: intron retained/excluded with *group* having more retention
-  - group_higher: sample group with more of the isoform resulting in the sequence in the "mutPept" column
+  - group_higher: sample group with more of the isoform resulting in the sequence in the "altPept" column
   - aa_change_type: type of amino acid change relative to ensembl
     - Canonical: protein coding event with both isoforms are in ensembl
     - Novel: the splice event generates novel transcript and novel amino acid sequence
@@ -204,7 +207,7 @@ Also see jetstream workflow: [workflows/prot.jst](workflows/prot.jst)
     - ND: effect was not determined
     - None: non-coding transcripts, silent, or protein loss events
   - effect_cat:
-    - Substitution: amino acid substitution between isoforms, with the group indicated in the "group_higher" column having more of the isoform with sequence in the "mutPept" column, and the other group having more of the isoform with the sequence in the "wtPept" column
+    - Substitution: amino acid substitution between isoforms, with the group indicated in the "group_higher" column having more of the isoform with sequence in the "altPept" column, and the other group having more of the isoform with the sequence in the "refPept" column
     - Insertion: amino acid insertion/deletion, with the group indicated in the "group_higher" column having more of the isoform with the insertion
     - Deletion: amino acid insertion/deletion, with the group indicated in the "group_higher" column having more of the isoform with the deletion
     - Truncation: amino acid sequence is truncated
