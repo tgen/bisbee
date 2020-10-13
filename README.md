@@ -3,6 +3,11 @@ alternative splicing analysis package.
 
 Bisbee perfoms differential splicing analysis, splicing outlier analysis, and splice isoform protein sequence prediction.  Each of these analysis steps may be run independently or may be combined into a pipeline using the workflows below.  Bisbee also provides utility scripts for extracting data, annotating, filtering and summarizing results.  Bisbee has been developed and tested using splice variant detection data from [SplAdder](https://github.com/ratschlab/spladder).
 
+### Citation
+Bisbee: A proteomics validated analysis package for detecting differential splicing, identifying splice outliers, and predicting splice event protein effects
+Rebecca F. Halperin, Apurva Hegde, Jessica D. Lang, Elizabeth A. Raupach, C4RCD Research Group, Christophe Legendre, Winnie S. Liang, Patricia M. LoRusso, Aleksandar Sekulic, Jeffrey A. Sosman, Jeffrey M. Trent, Sampathkumar Rangasamy, Patrick Pirrotte, Nicholas J. Schork
+bioRxiv 2020.08.13.250167; doi: https://doi.org/10.1101/2020.08.13.250167
+
 ## Dependencies
  - R (3.5.2 or later)
    - stats4
