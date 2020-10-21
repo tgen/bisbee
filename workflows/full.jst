@@ -1,0 +1,150 @@
+- name: setup
+  cmd: |
+   mkdir counts
+   mkdir prot
+   mkdir -p outlier/fit/tmp
+   mkdir outlier/scores
+   mkdir diff
+
+{% for event in event_list %}
+{% for n in range(event["n_max_test"]+1) %}
+- name: prepTest_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/prep.py  {{ event["test_file"] }} {{ event["name"]}} counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ ref_spladder_ver }} {{ test_samples }} {{ n }} {{ chunk_size }}
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_test"]+1) %}
+{% for group1 in group_list %}
+{% set i=loop.index %}
+{% for j in range(i,group_list|length) %}
+{% set group2=group_list[j] %}
+- name: diff_{{ event["name"] }}_{{ n }}_{{ group1 }}_{{ group2 }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/diff.R  counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ test_samples }} diff/{{ testname }}.{{ group1 }}vs{{ group2 }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ maxW }} {{ group1 }} {{ group2}}
+  after: prepTest_{{ event["name"] }}_{{ n }}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_test"]+1) %}
+- name: protSeq_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/prot/build.py counts/{{ testname }}.{{ event['name'] }}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ event['name'] }} {{ aapad }} prot/{{ testname }}.c{{ "%03d" % n }} {{ ensembl }} {{ ref }}
+  after: prepTest_{{ event["name"] }}_{{ n }}
+{% endfor %}
+{% endfor %}
+
+- name: getUnique
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/prot/getUnique.py prot {{ testname }}
+  after-re: protSeq_.*
+
+- name: getTop
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/prot/getTop.py prot {{ testname }}
+  after: getUnique
+
+{% for event in event_list %}
+{% for n in range(event["n_max_ref"]+1) %}
+- name: prepRef_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/prep.py  {{ event["ref_file"] }} {{ event["name"]}} counts/{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ ref_spladder_ver }} {{ ref_samples }} {{ n }} {{ chunk_size }}
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_ref"]+1) %}
+- name: fit_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/outlierFit.R  counts/{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ maxBeta }} outlier/fit/tmp/{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}
+  after: prepRef_{{ event["name"] }}_{{ n }}
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+- name: combine_fit_{{ event["name"] }}
+  cmd: |
+   head -n 1 outlier/fit/tmp/{{ refname }}.{{ event["name"]}}.c000.bisbeeFit.csv >outlier/fit/{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv
+   tail -q -n +2 outlier/fit/tmp/{{ refname }}.{{ event["name"]}}.c*.bisbeeFit.csv >>outlier/fit/{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv
+  after-re: fit_{{ event["name"] }}_.*
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_test"]+1) %}
+- name: score_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/outlierScore.R  outlier/fit/{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv outlier/scores/{{ testname }}.{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}
+  after:
+   - prepTest_{{ event["name"] }}_{{ n }}
+   - combine_fit_{{ event["name"] }}
+{% endfor %}
+{% endfor %}
+
+{% for group1 in group_list %}
+{% set i=loop.index %}
+{% for j in range(i,group_list|length) %}
+{% set group2=group_list[j] %}
+- name: filt_diff_{{ group1 }}_{{ group2 }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/filtDiff.py diff {{ testname }}.{{ group1 }}vs{{ group2 }} {{ diff_thresh}}
+  after-re:
+   - diff_.*
+{% endfor %}
+{% endfor %}
+
+{% for group1 in group_list %}
+{% set i=loop.index %}
+{% for j in range(i,group_list|length) %}
+{% set group2=group_list[j] %}
+- name: annot_diff_{{ group1 }}_{{ group2 }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/annotate.py {{ testname }}.{{ group1 }}vs{{ group2 }}.bisbeeDiff.thresh{{ "%2.1f" % diff_thresh | float(default='None') }}.csv prot {{ testname }}
+  after:
+   - filt_diff_{{ group1 }}_{{ group2 }}
+   - getTop
+{% endfor %}
+{% endfor %}
+
+{% for group in group_list %}
+- name: filt_out_{{ group }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/filtOut.py outlier/scores {{ testname }}.{{ refname }} {{ out_thresh }} {{ out_count }} {{ test_samples }} {{ group }}
+  after-re:
+   - score_.*
+   - getTop
+ {% endfor %}
+
+{% for group in group_list %}
+- name: annot_out_{{ group }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/annotate.py {{ testname }}.{{ refname }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.csv prot {{ testname }}
+  after: filt_out_{{ group }}
+ {% endfor %}
+
+- name: comb_diff
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/combine.py $PWD {{ testname }}. .bisbeeDiff.thresh{{ "%2.1f" % diff_thresh | float(default='None') }}.anno.csv ll_ratio,group_increased_alt
+  after-re: annot_diff_.*
+
+- name: comb_out
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/combine.py $PWD {{ testname }}.{{ refname }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }} .anno.csv group_increased_alt
+  after-re: annot_out_.*

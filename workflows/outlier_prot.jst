@@ -1,0 +1,105 @@
+- name: setup
+  cmd: |
+   mkdir counts
+   mkdir prot
+   mkdir -p outlier/fit/tmp
+   mkdir outlier/scores
+
+{% for event in event_list %}
+{% for n in range(event["n_max_test"]+1) %}
+- name: prepTest_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/prep.py  {{ event["test_file"] }} {{ event["name"]}} counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ ref_spladder_ver }} {{ test_samples }} {{ n }} {{ chunk_size }}
+  after: setup
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_ref"]+1) %}
+- name: prepRef_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/prep.py  {{ event["ref_file"] }} {{ event["name"]}} counts/{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ ref_spladder_ver }} {{ ref_samples }} {{ n }} {{ chunk_size }}
+  after: setup
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_ref"]+1) %}
+- name: fit_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/outlierFit.R  counts/{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ maxBeta }} outlier/fit/tmp/{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}
+  after: prepRef_{{ event["name"] }}_{{ n }}
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+- name: combine_fit_{{ event["name"] }}
+  cmd: |
+   head -n 1 outlier/fit/tmp/{{ refname }}.{{ event["name"]}}.c000.bisbeeFit.csv >outlier/fit/{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv
+   tail -q -n +2 outlier/fit/tmp/{{ refname }}.{{ event["name"]}}.c*.bisbeeFit.csv >>outlier/fit/{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv
+  after-re: fit_{{ event["name"] }}_.*
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_test"]+1) %}
+- name: score_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/outlierScore.R  outlier/fit/{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv outlier/scores/{{ testname }}.{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}
+  after:
+   - prepTest_{{ event["name"] }}_{{ n }}
+   - combine_fit_{{ event["name"] }}
+{% endfor %}
+{% endfor %}
+
+{% for group in group_list %}
+- name: filt_out_{{ group }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/filtOut.py outlier/scores {{ testname }}.{{ refname }} {{ out_thresh }} {{ out_count }} {{ test_samples }} {{ group }} {{ exclude_group }} {{ exclude_count }}
+  sbatch_args: [-t, "7-00:00:00"]
+  after-re: score_.*
+{% endfor %}
+
+{% for group in group_list %}
+- name: protSeq_{{ group }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/prot/build.py {{ testname }}.{{ refname }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.max{{ exclude_count }}{{ exclude_group }}.csv ALL {{ aapad }} prot/{{ testname }}.{{ group }} {{ ensembl }} {{ ref }}
+  sbatch_args: [-t, "7-00:00:00"]
+  after: filt_out_{{ group }}
+{% endfor %}
+
+- name: getUnique
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/prot/getUnique.py prot {{ testname }}
+  after-re: protSeq_.*
+
+- name: getTop
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/prot/getTop.py prot {{ testname }}
+  after: getUnique
+
+{% for group in group_list %}
+- name: annot_out_{{ group }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/annotate.py {{ testname }}.{{ refname }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.max{{ exclude_count }}{{ exclude_group }}.csv prot {{ testname }}
+  after:
+   - filt_out_{{ group }}
+   - getTop
+ {% endfor %}
+
+{% for group in group_list %}
+- name: count_out_{{ group }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/outSampleCounts.py outlier/scores {{ testname }}.{{ refname }} {{ out_thresh }} {{ testname }}.{{ refname }}.bisbeeOutlier.thresh{{ "%2.1f" % out_thresh }}.min{{ out_count }}{{ group }}.max{{ exclude_count }}{{ exclude_group }}.anno.csv
+  after:
+   - annot_out_{{ group }}
+ {% endfor %}

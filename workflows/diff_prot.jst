@@ -1,0 +1,83 @@
+- name: setup
+  cmd: |
+   mkdir counts
+   mkdir prot
+   mkdir diff
+
+{% for event in event_list %}
+{% for n in range(event["n_max_test"]+1) %}
+- name: prepTest_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/prep.py  {{ event["test_file"] }} {{ event["name"]}} counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ test_spladder_ver }} {{ test_samples }} {{ n }} {{ chunk_size }}
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_test"]+1) %}
+{% for group1 in group_list %}
+{% set i=loop.index %}
+{% for j in range(i,group_list|length) %}
+{% set group2=group_list[j] %}
+- name: diff_{{ event["name"] }}_{{ n }}_{{ group1 }}_{{ group2 }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/diff.R  counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ test_samples }} diff/{{ testname }}.{{ group1 }}vs{{ group2 }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ maxW }} {{ group1 }} {{ group2}}
+  after: prepTest_{{ event["name"] }}_{{ n }}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+{% for group1 in group_list %}
+{% set i=loop.index %}
+{% for j in range(i,group_list|length) %}
+{% set group2=group_list[j] %}
+- name: filt_diff_{{ group1 }}_{{ group2 }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/filtDiff.py diff {{ testname }}.{{ group1 }}vs{{ group2 }} {{ diff_thresh}}
+  after-re:
+   - diff_.*
+{% endfor %}
+{% endfor %}
+
+
+{% for group1 in group_list %}
+{% set i=loop.index %}
+{% for j in range(i,group_list|length) %}
+{% set group2=group_list[j] %}
+- name: protSeq_{{ group2 }}_{{ group2 }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/prot/build.py {{ testname }}.{{ group1 }}vs{{ group2 }}.bisbeeDiff.thresh{{ "%2.1f" % diff_thresh | float(default='None') }}.csv ALL {{ aapad }} prot/{{ testname }}.{{ group1 }}vs{{ group2 }} {{ ensembl }} {{ ref }}
+  sbatch_args: [-t, "7-00:00:00"]
+  after: filt_diff_{{ group1 }}_{{ group2 }}
+{% endfor %}
+{% endfor %}
+
+- name: getUnique
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/prot/getUnique.py prot {{ testname }}
+  after-re: protSeq_.*
+
+- name: getTop
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/prot/getTop.py prot {{ testname }}
+  after: getUnique
+
+{% for group1 in group_list %}
+{% set i=loop.index %}
+{% for j in range(i,group_list|length) %}
+{% set group2=group_list[j] %}
+- name: annot_diff_{{ group1 }}_{{ group2 }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/annotate.py {{ testname }}.{{ group1 }}vs{{ group2 }}.bisbeeDiff.thresh{{ "%2.1f" % diff_thresh | float(default='None') }}.csv prot {{ testname }}
+  after:
+   - filt_diff_{{ group1 }}_{{ group2 }}
+   - getTop
+{% endfor %}
+{% endfor %}

@@ -1,0 +1,56 @@
+- name: setup
+  cmd: |
+   mkdir counts
+   mkdir prot
+   mkdir -p outlier/fit/tmp
+   mkdir outlier/scores
+
+{% for event in event_list %}
+{% for n in range(event["n_max_test"]+1) %}
+- name: prepTest_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/prep.py  {{ event["test_file"] }} {{ event["name"]}} counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ test_spladder_ver }} {{ test_samples }} {{ n }} {{ chunk_size }}
+  after: setup
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_ref"]+1) %}
+- name: prep_{{ refname }}_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load python/3.6.0
+   python {{ bisbeePath }}/utils/prep.py  {{ event["ref_file"] }} {{ event["name"]}} counts/{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }} {{ ref_spladder_ver }} {{ ref_samples }} {{ n }} {{ chunk_size }}
+  after: setup
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_ref"]+1) %}
+- name: fit_{{ refname }}_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/outlierFit.R  counts/{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv {{ maxBeta }} outlier/fit/tmp/{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}
+  after: prep_{{ refname }}_{{ event["name"] }}_{{ n }}
+{% endfor %}
+{% endfor %}
+
+{% for event in event_list %}
+- name: combine_fit_{{ refname }}_{{ event["name"] }}
+  cmd: |
+   head -n 1 outlier/fit/tmp/{{ refname }}.{{ event["name"]}}.c000.bisbeeFit.csv >outlier/fit/{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv
+   tail -q -n +2 outlier/fit/tmp/{{ refname }}.{{ event["name"]}}.c*.bisbeeFit.csv >>outlier/fit/{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv
+  after-re: fit_{{ refname }}_{{ event["name"] }}_.*
+{% endfor %}
+
+{% for event in event_list %}
+{% for n in range(event["n_max_test"]+1) %}
+- name: score_{{refname}}_{{ event["name"] }}_{{ n }}
+  cmd: |
+   module load R/3.5.2
+   Rscript {{ bisbeePath }}/stats/outlierScore.R  outlier/fit/{{ refname }}.{{ event["name"]}}.all.bisbeeFit.csv counts/{{ testname }}.{{ event["name"]}}.c{{ "%03d" % n }}.bisbeeCounts.csv outlier/scores/{{ testname }}.{{ refname }}.{{ event["name"]}}.c{{ "%03d" % n }}
+  after:
+   - prepTest_{{ event["name"] }}_{{ n }}
+   - combine_fit_{{ refname }}_{{ event["name"] }}
+{% endfor %}
+{% endfor %}
