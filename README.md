@@ -162,7 +162,7 @@ Also see jetstream workflow: [workflows/prot.jst](workflows/prot.jst)
  
  `python utils/filtOut.py outlier/scores WangKuster.lowerGI 10`
  
- #### annotation
+ ### annotation
  
  `python utils/annotate.py bisbee_out prot_folder prot_prefix`
  
@@ -198,6 +198,14 @@ Also see jetstream workflow: [workflows/prot.jst](workflows/prot.jst)
     - NonCoding: splice event only effects non-coding transcripts
     - NA: effect not available
     
+## Other utility scripts
+### Find minimum outlier scores between two reference sets
+Sometimes it is useful to generate outlier scores using two different reference sets (for example, one set is better matched technically to the samples of interested, but another set has more diverse or better matched normal samples).  The min score script with find the mininum score of two sets of outlier scores for each event x sample.  If either has an nan, the score will be nan.
+`python utils/minScore.py scoreFile1 scoreFile2 outname`
+
+example:
+`python utils/minScore.py WangKuster.lowerGI.MUT.bisbeeOutlier.csv WangKuster.gtexGI.MUT.bisbeeOutlier.csv WangKuster.lowerGI.gtexGI.MUT.minScore.bisbeeOutlier.csv`
+
 ## Workflows
 Workflows are provided for use in the [jetstream](https://github.com/tgen/jetstream) pipeline framework. The workflows will divide the dataset into chunks and performs each step in parallel on the chunk.  The filter step at the end of the workflows will pull significant events into a single file.  If jetstream is run on a computing cluster with a slurm scheduler, the "--backend slurm" option may be used to submit each task as a slurm job.  If jetstream is run with the (default) local backend, each task will be launched as a process on the local machine.  
 
