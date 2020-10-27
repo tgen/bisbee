@@ -185,7 +185,7 @@ Also see jetstream workflow: [workflows/prot.jst](workflows/prot.jst)
   - aa_change_type: type of amino acid change relative to ensembl
     - Canonical: protein coding event with both isoforms are in ensembl
     - Novel: the splice event generates novel transcript and novel amino acid sequence
-    - Other: protein coding event that does not fit neatly into novel or canonical criteria
+    - Other: protein coding event that does not fit neatly into novel or canonical criteria.  Either it is novel at the transcript level, but does not generate a novel protein sequence.  Or the event does exist in known transcripts, but altering a transcript that does not have the event to have event results in a novel protein sequence.  This likely indicates that the transcripts with different isoforms of the event have different start codons and Bisbee predicted protein change may not be correct.
     - ND: effect was not determined
     - None: non-coding transcripts, silent, or protein loss events
   - effect_cat:
