@@ -206,6 +206,20 @@ Sometimes it is useful to generate outlier scores using two different reference 
 example:
 `python utils/minScore.py WangKuster.lowerGI.MUT.bisbeeOutlier.csv WangKuster.gtexGI.MUT.bisbeeOutlier.csv WangKuster.lowerGI.gtexGI.MUT.minScore.bisbeeOutlier.csv`
 
+### Count outlier burden by sample
+`python utils/sampleScoreBinCounts.py out_folder outname thresh`
+Counts the number of events per sample with outlier scores above or below the outlier threshold and with no score. Outputs a table where each row contains a sample, and each column is an event_type by outlier bin. The outlier bins are
+ - low_out: score <= -thresh
+ - not_out: -thresh < score < thresh
+ - high_out: score <= thresh
+ - no_score: score not available, typically indicates no coverage at event
+ 
+ ### Count outlier burden by annotations and sample
+`python utils/sampleScoreBinCounts.py out_folder outname thresh anno_file`
+Counts the number of outlier events and events with coverage per sample in each annotation category out of the events in the anno_file.  Produces two output files.  In both each row is a sample and each column is an annotation category (event_cat x group_increased_alt x aa_change_type x effect_cat)
+ - samplePassCounts.csv: counts of events passing the outlier threshold for each sample in each category.
+ - sampleScoreCounts.csv: counts of events with non-nan outlier scores for each sample in each category.  Note that only events in the *anno_file* are counted.
+
 ## Workflows
 Workflows are provided for use in the [jetstream](https://github.com/tgen/jetstream) pipeline framework. The workflows will divide the dataset into chunks and performs each step in parallel on the chunk.  The filter step at the end of the workflows will pull significant events into a single file.  If jetstream is run on a computing cluster with a slurm scheduler, the "--backend slurm" option may be used to submit each task as a slurm job.  If jetstream is run with the (default) local backend, each task will be launched as a process on the local machine.  
 
