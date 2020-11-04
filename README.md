@@ -160,7 +160,7 @@ Also see jetstream workflow: [workflows/prot.jst](workflows/prot.jst)
  
  example:
  
- `python utils/filtOut.py outlier/scores WangKuster.lowerGI 10`
+ `python utils/filtOut.py outlier/scores WangKuster.lowerGI 10 1`
  
  ### annotation
  
