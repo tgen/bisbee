@@ -36,7 +36,7 @@ bioRxiv 2020.08.13.250167; doi: https://doi.org/10.1101/2020.08.13.250167
 
 example (note example input files are provided [here](example_input)):
 
-`python utils/prep.py merge_graphs_mutex_exons_C3.counts.hdf5 MUT WangKuster_testSamples.txt counts/WangKuster.MUT 2`
+`python utils/prep.py merge_graphs_mutex_exons_C3.counts.hdf5 MUT counts/WangKuster.MUT 2 WangKuster_testSamples.txt`
 
 output event_jid column:
  - unique identifier for each splice events to faciliate comparisons across studies
