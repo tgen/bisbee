@@ -177,9 +177,9 @@ def jid_to_coords(event_jid):
 
 def find_matching_transcripts(ensembl,gene_id,event_coords):
  try:
-  transcript_ids=ensembl.transcript_ids_of_gene_id(gene_id[0:15])
+  transcript_ids=ensembl.transcript_ids_of_gene_id(gene_id.split('.')[0])
  except:
-  print('Warning: ' + gene_id[0:15] + ' not found')
+  print('Warning: ' + gene_id.split('.')[0] + ' not found')
   transcript_ids=[]
  transcript_table=pd.DataFrame(columns=["coding","matching_isoform"],index=transcript_ids)
  for tid in transcript_ids:
